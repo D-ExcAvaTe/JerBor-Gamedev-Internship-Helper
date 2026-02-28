@@ -197,7 +197,7 @@ export default function App() {
             className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors w-full sm:w-auto cursor-pointer"
           >
             <option value="deadline">⏳ เรียงตาม Deadline</option>
-            <option value="stipend">💰 เรียงตามเงินเดือน</option>
+            <option value="stipend">💰 เรียงตามเบี้ยเลี้ยง</option>
             <option value="status">📌 เรียงตามสถานะการติดตาม</option>
           </select>
         </div>
@@ -252,7 +252,7 @@ export default function App() {
       <footer className="border-t border-zinc-800/50 py-8 px-4 flex flex-col items-center gap-4">
         <div className="text-center">
           <p className="text-xs text-zinc-600">
-            Created by <span className="text-zinc-400 font-medium">Thirawut Phuangbuppha</span>
+            Created by <span className="text-zinc-400 font-medium">Thirawut Phuangbuppha และ นกน้อย</span>
           </p>
           <p className="text-xs text-zinc-700 mt-1">
             ⚠️ กรุณาตรวจเช็คความถูกต้องของข้อมูลอีกครั้ง เนื่องจากไม่ได้อัปเดตตลอดทุกลิสต์
