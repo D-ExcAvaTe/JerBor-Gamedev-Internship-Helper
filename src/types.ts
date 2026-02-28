@@ -20,7 +20,7 @@ export interface SubCategory {
   color: string;
   tags: Tag[];
 }
-
+export type AppStatus = 'saved' | 'applied' | 'interviewing' | 'offered' | 'rejected';
 export interface Internship {
   id: string;
   name: string;

@@ -1,17 +1,27 @@
-import { Internship, ConfigCategory, Tag } from '../types';
+import { Internship, ConfigCategory, Tag, AppStatus } from '../types';
 import { getDeadlineText } from '../utils/dateUtils';
-import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock, Bookmark } from 'lucide-react';
+import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock, Bookmark, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface DetailDrawerProps {
   internship: Internship | null;
   config: ConfigCategory[];
   onClose: () => void;
-  isBookmarked: boolean;
-  onToggleBookmark: (id: string) => void;
+  status: AppStatus | null;
+  updateTrackStatus: (id: string, status: AppStatus | null) => void;
+  showToast: (msg: string) => void;
 }
 
-export default function DetailDrawer({ internship, config, onClose, isBookmarked, onToggleBookmark }: DetailDrawerProps) {
+const STATUS_OPTIONS: { id: AppStatus | 'none'; label: string; colorClass: string }[] = [
+  { id: 'none', label: 'ไม่ติดตาม', colorClass: 'hover:bg-zinc-800 text-zinc-400 border-zinc-800' },
+  { id: 'saved', label: '📌 เล็งไว้', colorClass: 'hover:bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  { id: 'applied', label: '📤 ยื่นแล้ว', colorClass: 'hover:bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  { id: 'interviewing', label: '💬 รอสัมภาษณ์', colorClass: 'hover:bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+  { id: 'offered', label: '🎉 ได้งาน!', colorClass: 'hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+  { id: 'rejected', label: '❌ ไม่ผ่าน', colorClass: 'hover:bg-red-500/20 text-red-400 border-red-500/30' },
+];
+
+export default function DetailDrawer({ internship, config, onClose, status, updateTrackStatus, showToast }: DetailDrawerProps) {
   if (!internship) return null;
 
   const getTagDetails = (tagId: string): Tag | null => {
@@ -30,6 +40,12 @@ export default function DetailDrawer({ internship, config, onClose, isBookmarked
 
   const allTagIds = [...internship.positions, ...internship.workMode, internship.stipend];
   const tags = allTagIds.map(getTagDetails).filter(Boolean) as Tag[];
+
+  const handleCopyInfo = () => {
+    const text = `🎯 ${internship.name}\n📍 ${internship.location}\n💰 ${internship.stipendAmount}\n🔗 ${internship.jobPostUrl || internship.contactUrl}`;
+    navigator.clipboard.writeText(text);
+    showToast('คัดลอกข้อมูลลง Clipboard แล้ว!');
+  };
 
   return (
     <AnimatePresence>
@@ -52,10 +68,10 @@ export default function DetailDrawer({ internship, config, onClose, isBookmarked
             <h2 className="text-sm font-semibold text-zinc-100 uppercase tracking-tighter">Internship Details</h2>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => onToggleBookmark(internship.id)}
+                onClick={() => updateTrackStatus(internship.id, status ? null : 'saved')}
                 className="p-2 rounded-full hover:bg-zinc-800 transition-colors"
               >
-                <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-purple-500 text-purple-500' : 'text-zinc-400 hover:text-purple-400'}`} />
+                <Bookmark className={`w-5 h-5 ${status ? 'fill-purple-500 text-purple-500' : 'text-zinc-400 hover:text-purple-400'}`} />
               </button>
               <button
                 onClick={onClose}
@@ -79,6 +95,32 @@ export default function DetailDrawer({ internship, config, onClose, isBookmarked
                   <MapPin className="w-4 h-4 text-red-500" />
                   {internship.location.toUpperCase()}
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3">
+              <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                <Bookmark className="w-3.5 h-3.5" /> Application Status
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {STATUS_OPTIONS.map((opt) => {
+                  const isActive = (status === null && opt.id === 'none') || status === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => updateTrackStatus(internship.id, opt.id === 'none' ? null : opt.id as AppStatus)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                        isActive 
+                          ? opt.id === 'none' 
+                            ? 'bg-zinc-800 text-zinc-100 border-zinc-600' 
+                            : opt.colorClass.replace('hover:', '')
+                          : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -194,6 +236,13 @@ export default function DetailDrawer({ internship, config, onClose, isBookmarked
           </div>
 
           <div className="sticky bottom-0 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 p-4 flex flex-col gap-2">
+            <button
+              onClick={handleCopyInfo}
+              className="w-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm"
+            >
+              <Copy className="w-4 h-4" /> COPY INFO TO SHARE
+            </button>
+
             {internship.jobPostUrl && (
               <a
                 href={internship.jobPostUrl}
@@ -208,6 +257,7 @@ export default function DetailDrawer({ internship, config, onClose, isBookmarked
               href={internship.email ? `https://mail.google.com/mail/?view=cm&fs=1&to=${internship.email}` : internship.contactUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => updateTrackStatus(internship.id, 'applied')}
               className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
             >
               APPLY FOR INTERNSHIP <ExternalLink className="w-4 h-4" />

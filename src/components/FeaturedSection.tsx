@@ -1,13 +1,13 @@
-import { Internship, ConfigCategory, Tag } from '../types';
-import { Clock, Flame, DollarSign, ChevronRight, Bookmark } from 'lucide-react';
+import { Internship, ConfigCategory, Tag, AppStatus } from '../types';
+import { Clock, Flame, DollarSign, ChevronRight } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
 
 interface FeaturedSectionProps {
   internships: Internship[];
   config: ConfigCategory[];
   onCardClick: (internship: Internship) => void;
-  bookmarkedIds: string[];
-  onToggleBookmark: (id: string) => void;
+  trackedJobs: Record<string, AppStatus>;
+  updateTrackStatus: (id: string, status: AppStatus | null) => void;
 }
 
 function getDaysLeft(deadline: string): number | null {
@@ -16,7 +16,7 @@ function getDaysLeft(deadline: string): number | null {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export default function FeaturedSection({ internships, config, onCardClick, bookmarkedIds, onToggleBookmark }: FeaturedSectionProps) {
+export default function FeaturedSection({ internships, config, onCardClick, trackedJobs, updateTrackStatus }: FeaturedSectionProps) {
   const open = internships.filter(i => i.status === 'Open');
 
   const closingSoon = open
@@ -82,7 +82,9 @@ export default function FeaturedSection({ internships, config, onCardClick, book
           {featured.items.map((item, idx) => {
             const daysLeft = getDaysLeft(item.deadline);
             const isUrgent = daysLeft !== null && daysLeft <= 5;
-            const isBookmarked = bookmarkedIds.includes(item.id);
+            
+            // ตอนนี้แค่เช็คว่ามีการ Track ไว้ไหมในส่วน Featured
+            const isTracked = !!trackedJobs[item.id];
 
             const posTags = item.positions
               .map(findTag)
@@ -103,6 +105,7 @@ export default function FeaturedSection({ internships, config, onCardClick, book
                       ? 'bg-gradient-to-br from-orange-950/20 to-zinc-900 border-orange-500/20 hover:border-orange-400/50 hover:shadow-orange-500/10'
                       : 'bg-gradient-to-br from-yellow-950/20 to-zinc-900 border-yellow-500/20 hover:border-yellow-400/50 hover:shadow-yellow-500/10'
                   }
+                  ${isTracked ? 'ring-1 ring-purple-500/50' : ''}
                 `}
               >
                 <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl ${
@@ -112,12 +115,6 @@ export default function FeaturedSection({ internships, config, onCardClick, book
                 }`} />
 
                 <div className="absolute top-3 right-3 flex items-center gap-1">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onToggleBookmark(item.id); }}
-                    className="p-1.5 bg-zinc-900/80 rounded-full hover:bg-zinc-800 transition-colors backdrop-blur-sm"
-                  >
-                    <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-purple-500 text-purple-500' : 'text-zinc-400 hover:text-purple-400'}`} />
-                  </button>
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold border ${
                     idx === 0
                       ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'

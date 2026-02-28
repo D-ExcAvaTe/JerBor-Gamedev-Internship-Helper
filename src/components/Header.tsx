@@ -1,13 +1,13 @@
-import { Search, SlidersHorizontal, Bookmark } from 'lucide-react';
+import { Search, SlidersHorizontal, LayoutList } from 'lucide-react';
 
 interface HeaderProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onOpenFilter: () => void;
   activeFilterCount: number;
-  showBookmarks: boolean;
-  setShowBookmarks: (show: boolean) => void;
-  bookmarkedCount: number;
+  showTracked: boolean;
+  setShowTracked: (show: boolean) => void;
+  trackedCount: number;
 }
 
 export default function Header({ 
@@ -15,9 +15,9 @@ export default function Header({
   setSearchQuery, 
   onOpenFilter, 
   activeFilterCount,
-  showBookmarks,
-  setShowBookmarks,
-  bookmarkedCount
+  showTracked,
+  setShowTracked,
+  trackedCount
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 pt-6 pb-4 px-4 sm:px-6 lg:px-8">
@@ -46,17 +46,18 @@ export default function Header({
           </div>
           
           <button
-            onClick={() => setShowBookmarks(!showBookmarks)}
+            onClick={() => setShowTracked(!showTracked)}
             className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-xl transition-colors relative shrink-0 ${
-              showBookmarks 
+              showTracked 
                 ? 'bg-purple-500/10 border-purple-500/50 text-purple-400' 
                 : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300'
             }`}
           >
-            <Bookmark className={`w-5 h-5 ${showBookmarks ? 'fill-purple-500' : ''}`} />
-            {bookmarkedCount > 0 && !showBookmarks && (
+            <LayoutList className="w-5 h-5" />
+            <span className="hidden sm:inline font-medium text-sm">Tracker</span>
+            {trackedCount > 0 && !showTracked && (
               <span className="absolute -top-1.5 -right-1.5 bg-zinc-700 text-zinc-100 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-950">
-                {bookmarkedCount}
+                {trackedCount}
               </span>
             )}
           </button>
