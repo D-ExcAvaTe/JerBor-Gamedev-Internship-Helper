@@ -1,15 +1,17 @@
 import { Internship, ConfigCategory, Tag } from '../types';
 import { getDeadlineText } from '../utils/dateUtils';
-import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock } from 'lucide-react';
+import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock, Bookmark } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface DetailDrawerProps {
   internship: Internship | null;
   config: ConfigCategory[];
   onClose: () => void;
+  isBookmarked: boolean;
+  onToggleBookmark: (id: string) => void;
 }
 
-export default function DetailDrawer({ internship, config, onClose }: DetailDrawerProps) {
+export default function DetailDrawer({ internship, config, onClose, isBookmarked, onToggleBookmark }: DetailDrawerProps) {
   if (!internship) return null;
 
   const getTagDetails = (tagId: string): Tag | null => {
@@ -46,19 +48,25 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
           className="w-full max-w-md bg-zinc-950 border-l border-zinc-800 h-full overflow-y-auto shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 p-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-100 uppercase tracking-tighter">Internship Details</h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onToggleBookmark(internship.id)}
+                className="p-2 rounded-full hover:bg-zinc-800 transition-colors"
+              >
+                <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-purple-500 text-purple-500' : 'text-zinc-400 hover:text-purple-400'}`} />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="p-6 flex-1 flex flex-col gap-8">
-            {/* Header Info */}
             <div className="flex items-start gap-4">
               <img
                 src={internship.logoUrl}
@@ -74,7 +82,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </div>
             </div>
 
-            {/* Tags */}
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
@@ -91,7 +98,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               ))}
             </div>
 
-            {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1">
@@ -107,7 +113,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </div>
             </div>
 
-            {/* Work Hours */}
             {internship.workHours && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1 mb-1">
@@ -117,7 +122,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </div>
             )}
 
-            {/* Email Contact */}
             {internship.email && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1 mb-1">
@@ -132,7 +136,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </div>
             )}
 
-            {/* Job Post Link */}
             {internship.jobPostUrl && (
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
@@ -152,7 +155,23 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </div>
             )}
 
-            {/* Requirements */}
+            {internship.location && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-red-400" /> Location Map
+                </h3>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden h-48 w-full relative">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(internship.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col gap-3">
               <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-purple-400" /> Requirements
@@ -166,7 +185,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </ul>
             </div>
 
-            {/* Senior's Note */}
             <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-5 flex flex-col gap-2">
               <h3 className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Senior's Note</h3>
               <p className="text-sm text-purple-200/80 italic leading-relaxed">
@@ -175,7 +193,6 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
             </div>
           </div>
 
-          {/* Action Footer */}
           <div className="sticky bottom-0 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 p-4 flex flex-col gap-2">
             {internship.jobPostUrl && (
               <a
@@ -188,7 +205,7 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               </a>
             )}
             <a
-              href={internship.contactUrl}
+              href={internship.email ? `https://mail.google.com/mail/?view=cm&fs=1&to=${internship.email}` : internship.contactUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"

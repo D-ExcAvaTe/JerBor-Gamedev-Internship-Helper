@@ -1,14 +1,16 @@
 import { Internship, ConfigCategory, Tag } from '../types';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Bookmark } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
 
 interface InternshipCardProps {
   internship: Internship;
   config: ConfigCategory[];
   onClick: () => void;
+  isBookmarked: boolean;
+  onToggleBookmark: (id: string) => void;
 }
 
-export default function InternshipCard({ internship, config, onClick }: InternshipCardProps) {
+export default function InternshipCard({ internship, config, onClick, isBookmarked, onToggleBookmark }: InternshipCardProps) {
   const findTag = (id: string): Tag | null => {
     for (const cat of config) {
       const tag = cat.tags.find(t => t.id === id);
@@ -23,7 +25,6 @@ export default function InternshipCard({ internship, config, onClick }: Internsh
     return null;
   };
 
-  // Show positions + workMode + stipend (no location tag)
   const allTagIds = [...internship.positions, ...internship.workMode, internship.stipend];
   const tags = allTagIds.map(findTag).filter(Boolean) as Tag[];
 
@@ -61,12 +62,20 @@ export default function InternshipCard({ internship, config, onClick }: Internsh
             </div>
           </div>
         </div>
-        <div className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-          internship.status === 'Open'
-            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-            : 'bg-red-500/10 text-red-400 border-red-500/20'
-        }`}>
-          {internship.status.toUpperCase()}
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onToggleBookmark(internship.id); }}
+            className="p-1.5 -mr-1.5 rounded-full hover:bg-zinc-800 transition-colors"
+          >
+            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-purple-500 text-purple-500' : 'text-zinc-500 hover:text-purple-400'}`} />
+          </button>
+          <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+            internship.status === 'Open'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-400 border-red-500/20'
+          }`}>
+            {internship.status.toUpperCase()}
+          </div>
         </div>
       </div>
 

@@ -1,11 +1,13 @@
 import { Internship, ConfigCategory, Tag } from '../types';
-import { Clock, Flame, DollarSign, ChevronRight } from 'lucide-react';
+import { Clock, Flame, DollarSign, ChevronRight, Bookmark } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
 
 interface FeaturedSectionProps {
   internships: Internship[];
   config: ConfigCategory[];
   onCardClick: (internship: Internship) => void;
+  bookmarkedIds: string[];
+  onToggleBookmark: (id: string) => void;
 }
 
 function getDaysLeft(deadline: string): number | null {
@@ -14,10 +16,9 @@ function getDaysLeft(deadline: string): number | null {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export default function FeaturedSection({ internships, config, onCardClick }: FeaturedSectionProps) {
+export default function FeaturedSection({ internships, config, onCardClick, bookmarkedIds, onToggleBookmark }: FeaturedSectionProps) {
   const open = internships.filter(i => i.status === 'Open');
 
-  // Priority: closing soon (0-14 days), max 4
   const closingSoon = open
     .filter(i => {
       const d = getDaysLeft(i.deadline);
@@ -26,7 +27,6 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
     .sort((a, b) => getDaysLeft(a.deadline)! - getDaysLeft(b.deadline)!)
     .slice(0, 4);
 
-  // Fallback: highest stipend paid ones first
   const featured = closingSoon.length > 0
     ? { items: closingSoon, mode: 'closing' as const }
     : {
@@ -55,7 +55,6 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
   return (
     <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-4">
       <div className="max-w-5xl mx-auto">
-        {/* Section header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             {isClosing ? (
@@ -79,11 +78,11 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
           </div>
         </div>
 
-        {/* Featured Cards — Shopee-style horizontal strip */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {featured.items.map((item, idx) => {
             const daysLeft = getDaysLeft(item.deadline);
             const isUrgent = daysLeft !== null && daysLeft <= 5;
+            const isBookmarked = bookmarkedIds.includes(item.id);
 
             const posTags = item.positions
               .map(findTag)
@@ -106,26 +105,31 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
                   }
                 `}
               >
-                {/* Top glow accent */}
                 <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl ${
                   isUrgent ? 'bg-gradient-to-r from-transparent via-red-500 to-transparent' :
                   isClosing ? 'bg-gradient-to-r from-transparent via-orange-500 to-transparent' :
                   'bg-gradient-to-r from-transparent via-yellow-500 to-transparent'
                 }`} />
 
-                {/* Rank badge */}
-                <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold border ${
-                  idx === 0
-                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
-                    : idx === 1
-                      ? 'bg-zinc-400/10 text-zinc-400 border-zinc-600'
-                      : 'bg-zinc-800 text-zinc-600 border-zinc-700'
-                }`}>
-                  {idx + 1}
+                <div className="absolute top-3 right-3 flex items-center gap-1">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onToggleBookmark(item.id); }}
+                    className="p-1.5 bg-zinc-900/80 rounded-full hover:bg-zinc-800 transition-colors backdrop-blur-sm"
+                  >
+                    <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-purple-500 text-purple-500' : 'text-zinc-400 hover:text-purple-400'}`} />
+                  </button>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold border ${
+                    idx === 0
+                      ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                      : idx === 1
+                        ? 'bg-zinc-400/10 text-zinc-400 border-zinc-600'
+                        : 'bg-zinc-800 text-zinc-600 border-zinc-700'
+                  }`}>
+                    {idx + 1}
+                  </div>
                 </div>
 
-                {/* Logo + Name */}
-                <div className="flex flex-col gap-2 pr-5">
+                <div className="flex flex-col gap-2 pr-12">
                   <img
                     src={item.logoUrl}
                     alt={item.name}
@@ -137,7 +141,6 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
                   </h4>
                 </div>
 
-                {/* Position tags */}
                 {posTags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {posTags.map(tag => (
@@ -152,7 +155,6 @@ export default function FeaturedSection({ internships, config, onCardClick }: Fe
                   </div>
                 )}
 
-                {/* Deadline / Stipend badge */}
                 <div className="mt-auto">
                   {item.deadline ? (
                     <div className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${

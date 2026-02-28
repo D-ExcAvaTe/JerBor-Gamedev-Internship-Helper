@@ -27,7 +27,7 @@
 
 # Visual Studio cache directory
 .vs/
-
+node_modules/
 # Gradle cache directory
 .gradle/
 
