@@ -1,6 +1,6 @@
-import { Internship, ConfigCategory } from '../types';
+import { Internship, ConfigCategory, Tag } from '../types';
 import { getDeadlineText } from '../utils/dateUtils';
-import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Info } from 'lucide-react';
+import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Info, Link as LinkIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface DetailDrawerProps {
@@ -12,7 +12,8 @@ interface DetailDrawerProps {
 export default function DetailDrawer({ internship, config, onClose }: DetailDrawerProps) {
   if (!internship) return null;
 
-  const getTagDetails = (tagId: string) => {
+  // Helper สำหรับดึงข้อมูล Tag พร้อมสี Hex จาก Config
+  const getTagDetails = (tagId: string): Tag | null => {
     for (const category of config) {
       const tag = category.tags.find((t) => t.id === tagId);
       if (tag) return tag;
@@ -21,7 +22,7 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
   };
 
   const allTagIds = [...internship.positions, ...internship.workMode, internship.stipend];
-  const tags = allTagIds.map(getTagDetails).filter(Boolean);
+  const tags = allTagIds.map(getTagDetails).filter(Boolean) as Tag[];
 
   return (
     <AnimatePresence>
@@ -40,8 +41,9 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
           className="w-full max-w-md bg-zinc-950 border-l border-zinc-800 h-full overflow-y-auto shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Header */}
           <div className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 p-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-100">Internship Details</h2>
+            <h2 className="text-lg font-semibold text-zinc-100 uppercase tracking-tighter text-sm">Internship Details</h2>
             <button 
               onClick={onClose}
               className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
@@ -57,23 +59,28 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
                 src={internship.logoUrl} 
                 alt={`${internship.name} logo`} 
                 className="w-16 h-16 rounded-2xl object-cover bg-zinc-800 shadow-lg"
-                referrerPolicy="no-referrer"
+                // ลบ no-referrer ออกเพื่อให้ Google Drive ทำงานได้ปกติ
               />
               <div>
-                <h1 className="text-2xl font-bold text-zinc-100">{internship.name}</h1>
+                <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">{internship.name}</h1>
                 <div className="flex items-center gap-2 mt-2 text-sm text-zinc-400">
-                  <MapPin className="w-4 h-4" />
-                  {internship.location}
+                  <MapPin className="w-4 h-4 text-red-500" />
+                  {internship.location.toUpperCase()}
                 </div>
               </div>
             </div>
 
-            {/* Tags */}
+            {/* Tags - ปรับให้ใช้สี Hex จาก Config */}
             <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => tag && (
+              {tags.map((tag) => (
                 <span 
                   key={tag.id} 
-                  className={`px-3 py-1 rounded-md text-xs font-medium border ${tag.color}`}
+                  style={{ 
+                    backgroundColor: `${tag.color}15`, 
+                    color: tag.color, 
+                    borderColor: `${tag.color}30` 
+                  }}
+                  className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider"
                 >
                   {tag.label}
                 </span>
@@ -83,14 +90,34 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
-                <span className="text-xs text-zinc-500 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Stipend</span>
+                <span className="text-xs text-zinc-500 flex items-center gap-1"><DollarSign className="w-3 h-3 text-yellow-500" /> Stipend</span>
                 <span className="text-sm font-medium text-zinc-200">{internship.stipendAmount}</span>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
-                <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Deadline</span>
+                <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3 text-purple-400" /> Deadline</span>
                 <span className="text-sm font-medium text-zinc-200">{getDeadlineText(internship.deadline)}</span>
               </div>
             </div>
+
+            {/* Job Post Link Section - เพิ่มใหม่ตามที่ PM สั่ง */}
+            {internship.jobPostUrl && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4 text-blue-400" /> Original Post
+                </h3>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                  <p className="text-xs text-zinc-500 mb-2">โพสต์ประกาศรับสมัครงานต้นฉบับ:</p>
+                  <a 
+                    href={internship.jobPostUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-400 hover:text-blue-300 underline break-all flex items-center gap-1"
+                  >
+                    View Original Post <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Requirements */}
             <div className="flex flex-col gap-3">
@@ -98,28 +125,20 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
                 <Briefcase className="w-4 h-4 text-purple-400" /> Requirements
               </h3>
               <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2">
-                {internship.requirements.map((req, i) => (
-                  <li key={i}>{req}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Benefits */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                <Info className="w-4 h-4 text-emerald-400" /> Benefits
-              </h3>
-              <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2">
-                {internship.benefits.map((benefit, i) => (
-                  <li key={i}>{benefit}</li>
-                ))}
+                {internship.requirements.length > 0 ? (
+                  internship.requirements.map((req, i) => <li key={i}>{req}</li>)
+                ) : (
+                  <li className="list-none italic text-zinc-600">No specific requirements listed.</li>
+                )}
               </ul>
             </div>
 
             {/* Senior's Note */}
             <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-5 flex flex-col gap-2">
               <h3 className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Senior's Note</h3>
-              <p className="text-sm text-purple-200/80 italic leading-relaxed">"{internship.notes}"</p>
+              <p className="text-sm text-purple-200/80 italic leading-relaxed">
+                {internship.notes ? `"${internship.notes}"` : "No notes from seniors yet."}
+              </p>
             </div>
           </div>
 
@@ -129,9 +148,9 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
               href={internship.contactUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
             >
-              Apply Now <ExternalLink className="w-4 h-4" />
+              APPLY FOR INTERNSHIP <ExternalLink className="w-4 h-4" />
             </a>
           </div>
         </motion.div>

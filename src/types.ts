@@ -1,8 +1,9 @@
 export interface Tag {
   id: string;
   label: string;
-  color: string;
-  icon?: string;
+  color: string; // Base Hex Color
+  category: 'position' | 'location' | 'workMode' | 'stipend';
+  count: number; // สำหรับเช็กความนิยม
 }
 
 export interface ConfigCategory {
@@ -15,7 +16,7 @@ export interface Internship {
   id: string;
   name: string;
   logoUrl: string;
-  positions: string[]; // เก็บเป็น Array ของ Tag ID
+  positions: string[];
   workMode: string[];
   stipend: string;
   stipendAmount: string;
@@ -25,5 +26,6 @@ export interface Internship {
   requirements: string[];
   benefits: string[];
   contactUrl: string;
+  jobPostUrl: string; // <--- เพิ่มตัวนี้
   notes: string;
 }
