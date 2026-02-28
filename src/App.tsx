@@ -23,18 +23,9 @@ export default function App() {
   }, []);
 
   const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
+    setSelectedTags(prev =>
       prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
     );
-  };
-
-  const toggleCategory = (tagIds: string[]) => {
-    const allSelected = tagIds.every(id => selectedTags.includes(id));
-    if (allSelected) {
-      setSelectedTags(prev => prev.filter(id => !tagIds.includes(id)));
-    } else {
-      setSelectedTags(prev => Array.from(new Set([...prev, ...tagIds])));
-    }
   };
 
   const filteredData = internships.filter(item => {
@@ -44,37 +35,53 @@ export default function App() {
     return matchesSearch && matchesTags;
   });
 
-  if (loading) return <div className="h-screen flex items-center justify-center text-zinc-400 font-medium">Loading Database...</div>;
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center text-zinc-400 font-medium">
+      Loading Database...
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <FilterSection 
-        config={config} 
-        selectedTags={selectedTags} 
-        toggleTag={toggleTag} 
-        toggleCategory={toggleCategory} 
+      <FilterSection
+        config={config}
+        selectedTags={selectedTags}
+        toggleTag={toggleTag}
       />
-      
-      <main className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <main className="max-w-5xl mx-auto w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
         {filteredData.length > 0 ? (
           filteredData.map(item => (
-            <InternshipCard 
-              key={item.id} 
-              internship={item} 
-              config={config} 
-              onClick={() => setSelectedIntern(item)} 
+            <InternshipCard
+              key={item.id}
+              internship={item}
+              config={config}
+              onClick={() => setSelectedIntern(item)}
             />
           ))
         ) : (
-          <div className="col-span-full py-20 text-center text-zinc-500">No internships found matching your filters.</div>
+          <div className="col-span-full py-20 text-center text-zinc-500">
+            No internships found matching your filters.
+          </div>
         )}
       </main>
 
-      <DetailDrawer 
-        internship={selectedIntern} 
-        config={config} 
-        onClose={() => setSelectedIntern(null)} 
+      {/* Footer */}
+      <footer className="border-t border-zinc-800/50 py-6 px-4 text-center">
+        <p className="text-xs text-zinc-600">
+          Created by{' '}
+          <span className="text-zinc-400 font-medium">Thirawut Phuangbuppha</span>
+        </p>
+        <p className="text-xs text-zinc-700 mt-1">
+          ⚠️ กรุณาตรวจเช็คความถูกต้องของข้อมูลอีกครั้ง เนื่องจากไม่ได้อัปเดตตลอดทุกลิสต์
+        </p>
+      </footer>
+
+      <DetailDrawer
+        internship={selectedIntern}
+        config={config}
+        onClose={() => setSelectedIntern(null)}
       />
     </div>
   );

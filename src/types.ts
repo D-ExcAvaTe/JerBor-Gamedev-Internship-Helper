@@ -25,7 +25,9 @@ export interface Internship {
   status: 'Open' | 'Closed';
   requirements: string[];
   benefits: string[];
+  workHours: string;   // เวลาทำงาน เช่น "จันทร์-ศุกร์ 09:00-18:00"
+  email: string;       // อีเมลติดต่อ
   contactUrl: string;
-  jobPostUrl: string; // <--- เพิ่มตัวนี้
+  jobPostUrl: string;  // ลิงก์โพสต์สมัครงาน
   notes: string;
 }

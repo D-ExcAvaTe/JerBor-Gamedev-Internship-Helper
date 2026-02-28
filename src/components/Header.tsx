@@ -10,11 +10,14 @@ export default function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     <header className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 pt-6 pb-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span className="text-purple-500">Internship</span> Hub 🛠️
-          </h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+              <span className="text-purple-500">GameDev</span> Internship Hub 🎮
+            </h1>
+            <p className="text-xs text-zinc-500 mt-0.5 tracking-wide">Gamedev Internship App Database</p>
+          </div>
         </div>
-        
+
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-zinc-500 group-focus-within:text-purple-400 transition-colors" />

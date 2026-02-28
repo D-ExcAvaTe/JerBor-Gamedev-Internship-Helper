@@ -1,6 +1,6 @@
 const SHEET_ID = '19MSrc1mB4LJI7R9IeMUd3C4iGmxbzH8wM_TojY0c-rc';
 
-// สีประจำหมวดหมู่ตามที่ PM สั่ง
+// สีประจำหมวดหมู่
 const CAT_COLORS = {
   position: '#3B82F6', // Blue
   location: '#EF4444', // Red
@@ -13,34 +13,40 @@ async function fetchSheetData(sheetName: string) {
   const response = await fetch(url);
   const text = await response.text();
   const json = JSON.parse(text.substring(47).slice(0, -2));
-  return json.table.rows.map((row: any) => 
+  return json.table.rows.map((row: any) =>
     row.c.map((cell: any) => cell?.v ?? null)
   );
 }
 
 export const getAppData = async () => {
   const rows = await fetchSheetData('Internships');
-  const posCount: Record<string, {label: string, count: number}> = {};
-  const locCount: Record<string, {label: string, count: number}> = {};
-  const modeCount: Record<string, {label: string, count: number}> = {};
+  const posCount: Record<string, { label: string; count: number }> = {};
+  const locCount: Record<string, { label: string; count: number }> = {};
+  const modeCount: Record<string, { label: string; count: number }> = {};
 
   const internships = rows.map((row: any, index: number) => {
-    // Column M (index 12) คือ Job Post Link
-    const [id, name, logo, posStr, mode, stipend, amt, area, ddl, link, note, status, postLink] = row;
-    
-    // นับจำนวนครั้งที่ใช้แต่ละ Tag เพื่อเอาไปทำ Popularity
+    // Column layout (0-indexed):
+    // 0=id, 1=name, 2=logo, 3=positions, 4=mode, 5=stipend, 6=amt,
+    // 7=area, 8=deadline, 9=contactUrl, 10=note, 11=status,
+    // 12=jobPostUrl, 13=workHours, 14=email
+    const [
+      id, name, logo, posStr, mode, stipend, amt,
+      area, ddl, link, note, status,
+      postLink, workHours, email
+    ] = row;
+
     if (posStr) posStr.split(',').forEach((p: string) => {
       const label = p.trim();
-      const id = label.toLowerCase().replace(/\s+/g, '_');
-      posCount[id] = { label, count: (posCount[id]?.count || 0) + 1 };
+      const tagId = label.toLowerCase().replace(/\s+/g, '_');
+      posCount[tagId] = { label, count: (posCount[tagId]?.count || 0) + 1 };
     });
     if (area) {
-      const id = area.trim().toLowerCase().replace(/\s+/g, '_');
-      locCount[id] = { label: area.trim(), count: (locCount[id]?.count || 0) + 1 };
+      const tagId = area.trim().toLowerCase().replace(/\s+/g, '_');
+      locCount[tagId] = { label: area.trim(), count: (locCount[tagId]?.count || 0) + 1 };
     }
     if (mode) {
-      const id = mode.trim().toLowerCase().replace(/\s+/g, '_');
-      modeCount[id] = { label: mode.trim(), count: (modeCount[id]?.count || 0) + 1 };
+      const tagId = mode.trim().toLowerCase().replace(/\s+/g, '_');
+      modeCount[tagId] = { label: mode.trim(), count: (modeCount[tagId]?.count || 0) + 1 };
     }
 
     return {
@@ -54,39 +60,42 @@ export const getAppData = async () => {
       location: area ? area.trim().toLowerCase().replace(/\s+/g, '_') : '',
       deadline: ddl || '',
       status: status === 'Open' ? 'Open' : 'Closed',
-      requirements: [], benefits: [],
+      requirements: [],
+      benefits: [],
+      workHours: workHours || '',
+      email: email || '',
       contactUrl: link || '#',
-      jobPostUrl: postLink || '', // ลิงก์โพสต์สมัครงาน
-      notes: note || ''
+      jobPostUrl: postLink || '',
+      notes: note || '',
     };
   });
 
-  const config: ConfigCategory[] = [
+  const config = [
     {
       id: 'position', label: 'สายงาน (Positions)',
       tags: Object.entries(posCount).map(([id, info]) => ({
-        id, label: info.label, color: CAT_COLORS.position, category: 'position', count: info.count
-      })).sort((a, b) => b.count - a.count)
+        id, label: info.label, color: CAT_COLORS.position, category: 'position' as const, count: info.count,
+      })).sort((a, b) => b.count - a.count),
     },
     {
       id: 'location', label: 'สถานที่ (Location)',
       tags: Object.entries(locCount).map(([id, info]) => ({
-        id, label: info.label, color: CAT_COLORS.location, category: 'location', count: info.count
-      })).sort((a, b) => b.count - a.count)
+        id, label: info.label, color: CAT_COLORS.location, category: 'location' as const, count: info.count,
+      })).sort((a, b) => b.count - a.count),
     },
     {
       id: 'workMode', label: 'รูปแบบงาน',
       tags: Object.entries(modeCount).map(([id, info]) => ({
-        id, label: info.label, color: CAT_COLORS.workMode, category: 'workMode', count: info.count
-      }))
+        id, label: info.label, color: CAT_COLORS.workMode, category: 'workMode' as const, count: info.count,
+      })),
     },
     {
       id: 'stipend', label: 'เบี้ยเลี้ยง',
       tags: [
-        { id: 'paid', label: 'มีเบี้ยเลี้ยง', color: CAT_COLORS.stipend, category: 'stipend', count: 100 },
-        { id: 'unpaid', label: 'ไม่มีเบี้ยเลี้ยง', color: CAT_COLORS.stipend, category: 'stipend', count: 0 }
-      ]
-    }
+        { id: 'paid', label: 'มีเบี้ยเลี้ยง', color: CAT_COLORS.stipend, category: 'stipend' as const, count: 100 },
+        { id: 'unpaid', label: 'ไม่มีเบี้ยเลี้ยง', color: CAT_COLORS.stipend, category: 'stipend' as const, count: 0 },
+      ],
+    },
   ];
 
   return { internships, config };
