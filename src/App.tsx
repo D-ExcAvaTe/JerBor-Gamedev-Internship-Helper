@@ -28,6 +28,15 @@ export default function App() {
     );
   };
 
+  const toggleCategory = (tagIds: string[]) => {
+    const allSelected = tagIds.every(id => selectedTags.includes(id));
+    if (allSelected) {
+      setSelectedTags(prev => prev.filter(id => !tagIds.includes(id)));
+    } else {
+      setSelectedTags(prev => Array.from(new Set([...prev, ...tagIds])));
+    }
+  };
+
   const filteredData = internships.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const allItemTags = [...item.positions, ...item.workMode, item.stipend];
@@ -35,22 +44,31 @@ export default function App() {
     return matchesSearch && matchesTags;
   });
 
-  if (loading) return <div className="h-screen flex items-center justify-center text-zinc-400">Loading Internships...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-zinc-400 font-medium">Loading Database...</div>;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className=\"min-h-screen bg-zinc-950 text-zinc-100\">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <FilterSection config={config} selectedTags={selectedTags} toggleTag={toggleTag} />
+      <FilterSection 
+        config={config} 
+        selectedTags={selectedTags} 
+        toggleTag={toggleTag} 
+        toggleCategory={toggleCategory} 
+      />
       
-      <main className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredData.map(item => (
-          <InternshipCard 
-            key={item.id} 
-            internship={item} 
-            config={config} 
-            onClick={() => setSelectedIntern(item)} 
-          />
-        ))}
+      <main className=\"max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6\">
+        {filteredData.length > 0 ? (
+          filteredData.map(item => (
+            <InternshipCard 
+              key={item.id} 
+              internship={item} 
+              config={config} 
+              onClick={() => setSelectedIntern(item)} 
+            />
+          ))
+        ) : (
+          <div className=\"col-span-full py-20 text-center text-zinc-500\">No internships found matching your filters.</div>
+        )}
       </main>
 
       <DetailDrawer 

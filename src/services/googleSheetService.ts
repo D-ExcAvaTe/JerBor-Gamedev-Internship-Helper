@@ -1,79 +1,81 @@
-const SHEET_ID = '19MSrc1mB4LJI7R9IeMUd3C4iGmxbzH8wM_TojY0c-rc';
+import { useEffect, useState } from 'react';
+import { getAppData } from './services/googleSheetService';
+import { Internship, ConfigCategory } from './types';
+import Header from './components/Header';
+import FilterSection from './components/FilterSection';
+import InternshipCard from './components/InternshipCard';
+import DetailDrawer from './components/DetailDrawer';
 
-// สีมาตรฐานสำหรับ Tags (จะวนลูปใช้)
-const COLOR_PALETTE = ['#A855F7', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4'];
+export default function App() {
+  const [internships, setInternships] = useState<Internship[]>([]);
+  const [config, setConfig] = useState<ConfigCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedIntern, setSelectedIntern] = useState<Internship | null>(null);
 
-async function fetchSheetData(sheetName: string) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-  const response = await fetch(url);
-  const text = await response.text();
-  const json = JSON.parse(text.substring(47).slice(0, -2));
-  return json.table.rows.map((row: any) => 
-    row.c.map((cell: any) => cell?.v ?? null)
-  );
-}
+  useEffect(() => {
+    getAppData().then(({ internships, config }) => {
+      setInternships(internships);
+      setConfig(config);
+      setLoading(false);
+    });
+  }, []);
 
-export const getAppData = async () => {
-  const rows = await fetchSheetData('Internships');
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
+    );
+  };
 
-  const uniquePositions = new Set<string>();
-  const uniqueModes = new Set<string>();
+  const toggleCategory = (tagIds: string[]) => {
+    const allSelected = tagIds.every(id => selectedTags.includes(id));
+    if (allSelected) {
+      setSelectedTags(prev => prev.filter(id => !tagIds.includes(id)));
+    } else {
+      setSelectedTags(prev => Array.from(new Set([...prev, ...tagIds])));
+    }
+  };
 
-  // 1. จัดการแปลงข้อมูลแถวเป็น Internship Object และเก็บชื่อ Tag ทั้งหมดที่เจอ
-  const internships = rows.map((row: any, index: number) => {
-    const [id, name, logoUrl, posStr, mode, stipendStat, amount, area, deadline, link, note, status] = row;
-    
-    // เก็บชื่อ Tag แบบดิบๆ ไว้ทำ Config
-    if (posStr) posStr.split(',').forEach((p: string) => uniquePositions.add(p.trim()));
-    if (mode) uniqueModes.add(mode.trim());
-
-    return {
-      id: id?.toString() || index.toString(),
-      name: name || 'Unknown Company',
-      logoUrl: logoUrl || 'https://via.placeholder.com/100',
-      positions: posStr ? posStr.split(',').map((p: string) => p.trim().toLowerCase().replace(/\s+/g, '_')) : [],
-      workMode: mode ? [mode.trim().toLowerCase().replace(/\s+/g, '_')] : [],
-      stipend: stipendStat === 'มี' ? 'paid' : 'unpaid',
-      stipendAmount: amount || '-',
-      location: area || '-',
-      deadline: deadline || '',
-      status: status === 'Open' ? 'Open' : 'Closed',
-      requirements: [], 
-      benefits: [],
-      contactUrl: link || '#', // แก้ปัญหาปุ่ม Apply: ดึงจาก Column J
-      notes: note || ''
-    };
+  const filteredData = internships.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const allItemTags = [...item.positions, ...item.workMode, item.stipend];
+    const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => allItemTags.includes(tag));
+    return matchesSearch && matchesTags;
   });
 
-  // 2. เจน Config อัตโนมัติจาก Tag ที่สแกนเจอ
-  const config: any[] = [
-    {
-      id: 'position',
-      label: 'Position',
-      tags: Array.from(uniquePositions).map((name, i) => ({
-        id: name.toLowerCase().replace(/\s+/g, '_'),
-        label: name,
-        color: COLOR_PALETTE[i % COLOR_PALETTE.length]
-      }))
-    },
-    {
-      id: 'workMode',
-      label: 'Work Mode',
-      tags: Array.from(uniqueModes).map((name, i) => ({
-        id: name.toLowerCase().replace(/\s+/g, '_'),
-        label: name,
-        color: '#6366F1'
-      }))
-    },
-    {
-      id: 'stipend',
-      label: 'Stipend',
-      tags: [
-        { id: 'paid', label: 'Paid (มีเบี้ยเลี้ยง)', color: '#10B981' },
-        { id: 'unpaid', label: 'Unpaid (ไม่มีเบี้ยเลี้ยง)', color: '#6B7280' }
-      ]
-    }
-  ];
+  if (loading) return <div className="h-screen flex items-center justify-center text-zinc-400 font-medium">Loading Database...</div>;
 
-  return { internships, config };
-};
+  return (
+    <div className=\"min-h-screen bg-zinc-950 text-zinc-100\">
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <FilterSection 
+        config={config} 
+        selectedTags={selectedTags} 
+        toggleTag={toggleTag} 
+        toggleCategory={toggleCategory} 
+      />
+      
+      <main className=\"max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6\">
+        {filteredData.length > 0 ? (
+          filteredData.map(item => (
+            <InternshipCard 
+              key={item.id} 
+              internship={item} 
+              config={config} 
+              onClick={() => setSelectedIntern(item)} 
+            />
+          ))
+        ) : (
+          <div className=\"col-span-full py-20 text-center text-zinc-500\">No internships found matching your filters.</div>
+        )}
+      </main>
+
+      <DetailDrawer 
+        internship={selectedIntern} 
+        config={config} 
+        onClose={() => setSelectedIntern(null)} 
+      />
+    </div>
+  );
+}
