@@ -1,14 +1,23 @@
 export interface Tag {
   id: string;
   label: string;
-  color: string; // Base Hex Color
-  category: 'position' | 'location' | 'workMode' | 'stipend';
-  count: number; // สำหรับเช็กความนิยม
+  color: string;
+  category: 'position' | 'workMode' | 'stipend';
+  positionCategory?: 'programmer' | 'artist' | 'design' | 'other'; // for position tags
+  count: number;
 }
 
 export interface ConfigCategory {
   id: string;
   label: string;
+  tags: Tag[];
+  subCategories?: SubCategory[];
+}
+
+export interface SubCategory {
+  id: string;
+  label: string;
+  color: string;
   tags: Tag[];
 }
 
@@ -25,9 +34,9 @@ export interface Internship {
   status: 'Open' | 'Closed';
   requirements: string[];
   benefits: string[];
-  workHours: string;   // เวลาทำงาน เช่น "จันทร์-ศุกร์ 09:00-18:00"
-  email: string;       // อีเมลติดต่อ
+  workHours: string;
+  email: string;
   contactUrl: string;
-  jobPostUrl: string;  // ลิงก์โพสต์สมัครงาน
+  jobPostUrl: string;
   notes: string;
 }

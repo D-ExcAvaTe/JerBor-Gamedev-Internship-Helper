@@ -4,6 +4,7 @@ import { Internship, ConfigCategory } from './types';
 import Header from './components/Header';
 import FilterSection from './components/FilterSection';
 import InternshipCard from './components/InternshipCard';
+import FeaturedSection from './components/FeaturedSection';
 import DetailDrawer from './components/DetailDrawer';
 
 export default function App() {
@@ -28,6 +29,8 @@ export default function App() {
     );
   };
 
+  const isFiltering = searchQuery.length > 0 || selectedTags.length > 0;
+
   const filteredData = internships.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const allItemTags = [...item.positions, ...item.workMode, item.stipend];
@@ -50,7 +53,26 @@ export default function App() {
         toggleTag={toggleTag}
       />
 
-      <main className="max-w-5xl mx-auto w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+      {/* Featured section — hide when actively filtering */}
+      {!isFiltering && (
+        <FeaturedSection
+          internships={internships}
+          config={config}
+          onCardClick={setSelectedIntern}
+        />
+      )}
+
+      {/* Divider + list header */}
+      <div className="max-w-5xl mx-auto w-full px-6 pt-6 pb-2">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            {isFiltering ? `ผลลัพธ์ ${filteredData.length} รายการ` : `ทั้งหมด ${filteredData.length} บริษัท · เรียงตาม Deadline`}
+          </span>
+          <div className="flex-1 h-px bg-zinc-800" />
+        </div>
+      </div>
+
+      <main className="max-w-5xl mx-auto w-full px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
         {filteredData.length > 0 ? (
           filteredData.map(item => (
             <InternshipCard

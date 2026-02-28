@@ -16,6 +16,12 @@ export default function DetailDrawer({ internship, config, onClose }: DetailDraw
     for (const category of config) {
       const tag = category.tags.find((t) => t.id === tagId);
       if (tag) return tag;
+      if ((category as any).subCategories) {
+        for (const sub of (category as any).subCategories) {
+          const t = sub.tags.find((t: any) => t.id === tagId);
+          if (t) return t;
+        }
+      }
     }
     return null;
   };
