@@ -54,7 +54,8 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 py-8">
       {/* Category Buttons */}
-      <div className="max-w-xl w-full flex flex-col gap-3">
+      <div className="max-w-xl w-full flex flex-col gap-5">
+        <p className="text-center text-sm font-semibold text-zinc-400 mb-2">เลือกตำแหน่งงานที่สนใจ</p>
         {categories.map((category, idx) => {
           const Icon = category.icon;
           const isSelected = selectedRoles.includes(category.id);

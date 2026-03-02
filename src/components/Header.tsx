@@ -75,10 +75,14 @@ export default function Header({
 
           <button
             onClick={onOpenFilter}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-zinc-300 relative shrink-0"
+            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-medium relative shrink-0 ${
+              activeFilterCount > 0
+                ? 'bg-purple-600/20 border border-purple-500/50 text-purple-400 hover:bg-purple-600/30 hover:border-purple-400/70'
+                : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800'
+            }`}
           >
             <SlidersHorizontal className="w-5 h-5" />
-            <span className="font-medium text-sm">Filters</span>
+            <span>Filters</span>
             {activeFilterCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-purple-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-lg animate-in zoom-in duration-300">
                 {activeFilterCount}

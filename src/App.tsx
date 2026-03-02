@@ -144,7 +144,10 @@ export default function App() {
         return targetSub ? targetSub.tags.map(t => t.id) : [];
       }).flat();
       // Check if ANY of the role's tags are in the item's positions
-      matchesRoles = rolesWithTags.some(roleTag => item.positions.includes(roleTag));
+      // If rolesWithTags is empty, don't filter (show all items)
+      matchesRoles = rolesWithTags.length > 0 
+        ? rolesWithTags.some(roleTag => item.positions.includes(roleTag))
+        : true;
     }
     
     return matchesSearch && matchesTags && matchesRoles;
@@ -159,7 +162,7 @@ export default function App() {
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
         onOpenFilter={() => setIsFilterOpen(true)}
-        activeFilterCount={selectedTags.length}
+        activeFilterCount={selectedTags.length + selectedRoles.length}
         onOpenSuggest={() => setIsSuggestOpen(true)}
         onLogoClick={resetApp}
       />
