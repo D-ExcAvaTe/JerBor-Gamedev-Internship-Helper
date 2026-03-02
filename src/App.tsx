@@ -7,6 +7,7 @@ import InternshipCard from './components/InternshipCard';
 import FeaturedSection from './components/FeaturedSection';
 import StatusList from './components/StatusList';
 import DetailDrawer from './components/DetailDrawer';
+import HomeScreen from './components/HomeScreen';
 import SkeletonCard from './components/SkeletonCard';
 import Toast from './components/Toast';
 import SuggestModal from './components/SuggestModal';
@@ -26,6 +27,7 @@ export default function App() {
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [trackedJobs, setTrackedJobs] = useState<Record<string, AppStatus>>({});
   const [sortOption, setSortOption] = useState<SortOption>('deadline');
+  const [showHome, setShowHome] = useState(true);
   
   const [toastInfo, setToastInfo] = useState<{ visible: boolean; message: string }>({
     visible: false,
@@ -76,6 +78,37 @@ export default function App() {
   const resetApp = () => {
     clearFilters();
     setSelectedIntern(null);
+    setShowHome(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCategorySelect = (category: 'programmer' | 'artist' | 'design' | 'other') => {
+    // Find all position tags that belong to this category
+    const positionConfig = config.find(c => c.id === 'position');
+    if (!positionConfig) return;
+
+    const categoryTags: string[] = [];
+
+    if (category === 'other') {
+      // Get all "other" position tags
+      if (positionConfig.subCategories) {
+        const otherSub = positionConfig.subCategories.find(s => s.id === 'other');
+        if (otherSub) {
+          categoryTags.push(...otherSub.tags.map(t => t.id));
+        }
+      }
+    } else {
+      // Get tags from specific category
+      if (positionConfig.subCategories) {
+        const targetSub = positionConfig.subCategories.find(s => s.id === category);
+        if (targetSub) {
+          categoryTags.push(...targetSub.tags.map(t => t.id));
+        }
+      }
+    }
+
+    setSelectedTags(categoryTags);
+    setShowHome(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -86,6 +119,9 @@ export default function App() {
     
     return matchesSearch && matchesTags;
   });
+
+  const openInternships = filteredData.filter(item => item.status === 'Open');
+  const closedInternships = filteredData.filter(item => item.status === 'Closed');
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-purple-500/30">
@@ -106,7 +142,10 @@ export default function App() {
         toggleTag={toggleTag}
         clearFilters={clearFilters}
       />
-      
+
+      {showHome && !searchQuery && selectedTags.length === 0 && loading === false ? (
+        <HomeScreen onSelectCategory={handleCategorySelect} />
+      ) : (
       <main className="max-w-5xl mx-auto p-6 flex flex-col gap-8">
         {!searchQuery && selectedTags.length === 0 && (
           <>
@@ -118,7 +157,7 @@ export default function App() {
               />
             ) : (
               <FeaturedSection 
-                internships={internships} 
+                internships={openInternships} 
                 config={config} 
                 onCardClick={setSelectedIntern}
                 trackedJobs={trackedJobs}
@@ -134,7 +173,7 @@ export default function App() {
               All Internships
             </h2>
             <span className="bg-zinc-800 text-zinc-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
-              {filteredData.length}
+              {openInternships.length}
             </span>
           </div>
         </div>
@@ -143,9 +182,9 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
           </div>
-        ) : filteredData.length > 0 ? (
+        ) : openInternships.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredData.map((item, index) => (
+            {openInternships.map((item, index) => (
               <InternshipCard 
                 key={item.id} 
                 internship={item} 
@@ -169,7 +208,37 @@ export default function App() {
             </p>
           </motion.div>
         )}
+
+        {closedInternships.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-6">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold tracking-tight text-zinc-400">
+                  ❌ Closed Internships
+                </h2>
+                <span className="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {closedInternships.length}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-600 italic">สมัครไม่ได้แล้ว</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60">
+              {closedInternships.map((item, index) => (
+                <InternshipCard 
+                  key={item.id} 
+                  internship={item} 
+                  config={config} 
+                  onClick={() => setSelectedIntern(item)}
+                  status={trackedJobs[item.id] || null}
+                  updateTrackStatus={updateTrackStatus}
+                  index={index}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </main>
+      )}
 
       <footer className="border-t border-zinc-800/50 py-8 px-4 flex flex-col items-center gap-4">
         <div className="text-center">

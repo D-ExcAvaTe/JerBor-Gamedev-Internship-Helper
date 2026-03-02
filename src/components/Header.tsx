@@ -62,13 +62,15 @@ export default function Header({
               placeholder="Search companies..."
             />
           </div>
+        </div>
 
+        <div className="flex gap-2">
           <button
             onClick={onOpenSuggest}
             className="flex items-center justify-center gap-2 px-4 py-2 border rounded-xl transition-colors relative shrink-0 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300"
           >
             <Lightbulb className="w-5 h-5" />
-            <span className="hidden sm:inline font-medium text-sm">แนะนำบริษัท</span>
+            <span className="font-medium text-sm">แนะนำบริษัท</span>
           </button>
 
           <button
@@ -76,7 +78,7 @@ export default function Header({
             className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-zinc-300 relative shrink-0"
           >
             <SlidersHorizontal className="w-5 h-5" />
-            <span className="hidden sm:inline font-medium text-sm">Filters</span>
+            <span className="font-medium text-sm">Filters</span>
             {activeFilterCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-purple-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-lg animate-in zoom-in duration-300">
                 {activeFilterCount}
