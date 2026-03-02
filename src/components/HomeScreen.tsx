@@ -53,29 +53,6 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 py-8">
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: -20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="flex flex-col items-center mb-16"
-      >
-        <img
-          src="/logo.png"
-          alt="GameDev Hub"
-          className="h-20 w-auto object-contain mb-4"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-100 flex items-center gap-3">
-          <span className="text-purple-500">GameDev</span> Hub 🎮
-        </h1>
-        <p className="text-sm text-zinc-400 tracking-wide uppercase font-semibold mt-2">
-          Internship Database
-        </p>
-      </motion.div>
-
       {/* Category Buttons */}
       <div className="max-w-xl w-full flex flex-col gap-3">
         {categories.map((category, idx) => {
@@ -206,7 +183,7 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-12 text-xs text-zinc-600 text-center max-w-md"
+        className="mt-8 text-xs text-zinc-600 text-center max-w-md"
       >
         💡 Select one or more roles and click "Explore Now", or use search & filters in the header
       </motion.p>

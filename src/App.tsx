@@ -121,23 +121,8 @@ export default function App() {
   };
 
   const handleRolesSelect = (roles: ('programmer' | 'artist' | 'design' | 'other')[]) => {
-    // Get all position tags from selected roles
-    const positionConfig = config.find(c => c.id === 'position');
-    if (!positionConfig) return;
-
-    const roleTags: string[] = [];
-
-    roles.forEach(role => {
-      if (positionConfig.subCategories) {
-        const targetSub = positionConfig.subCategories.find(s => s.id === role);
-        if (targetSub) {
-          roleTags.push(...targetSub.tags.map(t => t.id));
-        }
-      }
-    });
-
     setSelectedRoles(roles);
-    setSelectedTags(roleTags);
+    setSelectedTags([]); // Don't set tags, just use role filtering
     setShowHome(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -145,9 +130,24 @@ export default function App() {
   const filteredData = internships.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const allItemTags = [...item.positions, ...item.workMode, item.stipend, item.location.toLowerCase().replace(/\s+/g, '_')];
+    
+    // Tag filter: ALL selected tags must match (AND logic)
     const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => allItemTags.includes(tag));
     
-    return matchesSearch && matchesTags;
+    // Role filter: ANY selected role's tags must match (OR logic)
+    let matchesRoles = true;
+    if (selectedRoles.length > 0) {
+      const rolesWithTags = selectedRoles.map(role => {
+        const positionConfig = config.find(c => c.id === 'position');
+        if (!positionConfig || !positionConfig.subCategories) return [];
+        const targetSub = positionConfig.subCategories.find(s => s.id === role);
+        return targetSub ? targetSub.tags.map(t => t.id) : [];
+      }).flat();
+      // Check if ANY of the role's tags are in the item's positions
+      matchesRoles = rolesWithTags.some(roleTag => item.positions.includes(roleTag));
+    }
+    
+    return matchesSearch && matchesTags && matchesRoles;
   });
 
   const openInternships = filteredData.filter(item => item.status === 'Open');
