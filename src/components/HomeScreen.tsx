@@ -51,9 +51,12 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
     onSelectRoles(selectedRoles);
   };
 
+  const handleViewAll = () => {
+    onSelectRoles([]);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 py-8">
-      {/* Category Buttons */}
       <div className="max-w-xl w-full flex flex-col gap-5">
         <p className="text-center text-sm font-semibold text-zinc-400 mb-2">เลือกตำแหน่งงานที่สนใจ</p>
         {categories.map((category, idx) => {
@@ -86,7 +89,6 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
                 perspective: '1000px',
               }}
             >
-              {/* Checkbox */}
               <div className={`
                 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
                 transition-all
@@ -106,7 +108,6 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
                 )}
               </div>
 
-              {/* Icon and Label */}
               <div className="flex items-center gap-2 flex-1 text-left">
                 <Icon className="w-5 h-5 text-inherit flex-shrink-0" />
                 <span className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
@@ -117,7 +118,6 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
           );
         })}
 
-        {/* Other option checkbox */}
         <motion.button
           onClick={() => handleToggleRole('other')}
           initial={{ opacity: 0, rotateY: 90, y: 10 }}
@@ -158,35 +158,46 @@ export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
         </motion.button>
       </div>
 
-      {/* Apply Button */}
-      <motion.button
-        onClick={handleApply}
-        disabled={selectedRoles.length === 0}
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.32 }}
-        whileHover={selectedRoles.length > 0 ? { scale: 1.05 } : {}}
-        whileTap={selectedRoles.length > 0 ? { scale: 0.95 } : {}}
-        className={`
-          mt-6 px-8 py-2.5 rounded-lg font-bold text-sm
-          transition-all
-          ${selectedRoles.length > 0
-            ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-          }
-        `}
+        className="mt-6 flex flex-wrap items-center justify-center gap-4"
       >
-        Explore Now ({selectedRoles.length})
-      </motion.button>
+        <motion.button
+          onClick={handleViewAll}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-6 py-2.5 rounded-lg font-bold text-sm bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-all shadow-lg"
+        >
+          See All Internships
+        </motion.button>
 
-      {/* Footer hint */}
+        <motion.button
+          onClick={handleApply}
+          disabled={selectedRoles.length === 0}
+          whileHover={selectedRoles.length > 0 ? { scale: 1.05 } : {}}
+          whileTap={selectedRoles.length > 0 ? { scale: 0.95 } : {}}
+          className={`
+            px-8 py-2.5 rounded-lg font-bold text-sm
+            transition-all
+            ${selectedRoles.length > 0
+              ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+              : 'bg-zinc-800/50 text-zinc-500 cursor-not-allowed border border-zinc-800'
+            }
+          `}
+        >
+          Explore Now ({selectedRoles.length})
+        </motion.button>
+      </motion.div>
+
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         className="mt-8 text-xs text-zinc-600 text-center max-w-md"
       >
-        💡 Select one or more roles and click "Explore Now", or use search & filters in the header
+        💡 Select one or more roles and click "Explore Now", or use "See All Internships" to see all available internships
       </motion.p>
     </div>
   );

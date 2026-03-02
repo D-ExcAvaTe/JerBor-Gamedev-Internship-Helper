@@ -1,12 +1,12 @@
 const SHEET_ID = '19MSrc1mB4LJI7R9IeMUd3C4iGmxbzH8wM_TojY0c-rc';
 
 const CAT_COLORS = {
-  programmer: '#3B82F6',   // Blue
-  artist: '#3B82F6',       // Blue (unified)
-  design: '#3B82F6',       // Blue (unified)
-  other: '#3B82F6',        // Blue (unified)
-  workMode: '#06B6D4',     // Cyan
-  stipend: '#EAB308',      // Yellow
+  programmer: '#3B82F6',
+  artist: '#3B82F6',
+  design: '#3B82F6',
+  other: '#3B82F6',
+  workMode: '#06B6D4',
+  stipend: '#EAB308',
 };
 
 function classifyPosition(label: string): 'programmer' | 'artist' | 'design' | 'other' {
@@ -36,11 +36,10 @@ function classifyPosition(label: string): 'programmer' | 'artist' | 'design' | '
   return 'other';
 }
 
-// Normalize work mode to exactly 3 canonical values
 function normalizeWorkMode(mode: string): string {
   const m = mode.trim().toLowerCase();
   if (m.includes('remote') || m === 'remote 100%') return 'Remote 100%';
-  if (m.includes('wfh') || m === 'wfh 100%') return 'Remote 100%'; // WFH 100% = Remote 100%
+  if (m.includes('wfh') || m === 'wfh 100%') return 'Remote 100%';
   if (m.includes('hybrid') || m.includes('onsite/wfh')) return 'Hybrid';
   if (m.includes('onsite')) return 'Onsite 100%';
   return '';
@@ -82,37 +81,50 @@ export const getAppData = async () => {
       modeCount[tagId] = { label: normalizedMode, count: (modeCount[tagId]?.count || 0) + 1 };
     }
 
-    // Parse deadline
     let deadlineStr = '';
     if (ddl) {
-      if (typeof ddl === 'string') {
-        deadlineStr = ddl;
-      } else if (ddl instanceof Date) {
-        deadlineStr = ddl.toISOString().slice(0, 10);
-      } else {
-        const match = String(ddl).match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (match) {
-          const y = match[1], m = String(parseInt(match[2]) + 1).padStart(2, '0'), d = String(match[3]).padStart(2, '0');
-          deadlineStr = `${y}-${m}-${d}`;
+      const ddlString = String(ddl).trim();
+      const matchDateObj = ddlString.match(/Date\((\d+),\s*(\d+),\s*(\d+)/);
+      
+      if (matchDateObj) {
+        const y = matchDateObj[1];
+        const m = String(parseInt(matchDateObj[2]) + 1).padStart(2, '0');
+        const d = String(matchDateObj[3]).padStart(2, '0');
+        deadlineStr = `${y}-${m}-${d}`;
+      } else if (ddlString.includes('/')) {
+        const parts = ddlString.split('/');
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+             deadlineStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+          } else {
+             deadlineStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
         } else {
-          deadlineStr = String(ddl);
+          deadlineStr = ddlString;
         }
+      } else {
+        deadlineStr = ddlString;
       }
     }
 
     const stipendVal = (typeof stipend === 'string' && stipend.trim() === 'มี') ? 'paid' : 'unpaid';
 
-    // Check if deadline has passed
     let finalStatus: 'Open' | 'Closed' = 'Closed';
     if (status === 'Open') {
       if (deadlineStr) {
         const deadline = new Date(deadlineStr);
-        const now = new Date();
-        finalStatus = deadline.getTime() >= now.getTime() ? 'Open' : 'Closed';
+        if (!isNaN(deadline.getTime())) {
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
+          finalStatus = deadline.getTime() >= now.getTime() ? 'Open' : 'Closed';
+        } else {
+          finalStatus = 'Open';
+        }
       } else {
-        // No deadline, keep as Open if status is Open
         finalStatus = 'Open';
       }
+    } else {
+      finalStatus = status === 'Closed' ? 'Closed' : 'Open';
     }
 
     return {
@@ -136,17 +148,19 @@ export const getAppData = async () => {
     };
   });
 
-  // Sort by deadline: with deadline first (ascending), then no-deadline
   const internships = [...rawInternships].sort((a, b) => {
-    const aHas = !!a.deadline;
-    const bHas = !!b.deadline;
-    if (aHas && bHas) return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-    if (aHas && !bHas) return -1;
-    if (!aHas && bHas) return 1;
+    const timeA = a.deadline ? new Date(a.deadline).getTime() : NaN;
+    const timeB = b.deadline ? new Date(b.deadline).getTime() : NaN;
+    
+    const isValidA = !isNaN(timeA);
+    const isValidB = !isNaN(timeB);
+
+    if (isValidA && isValidB) return timeA - timeB;
+    if (isValidA && !isValidB) return -1;
+    if (!isValidA && isValidB) return 1;
     return 0;
   });
 
-  // Build position sub-categories
   const posByCategory: Record<string, typeof posCount> = {
     programmer: {}, artist: {}, design: {}, other: {}
   };
@@ -184,7 +198,6 @@ export const getAppData = async () => {
     })).filter(sc => sc.tags.length > 0),
   };
 
-  // Count actual paid/unpaid
   const paidCount = internships.filter(i => i.stipend === 'paid').length;
   const unpaidCount = internships.filter(i => i.stipend === 'unpaid').length;
 
