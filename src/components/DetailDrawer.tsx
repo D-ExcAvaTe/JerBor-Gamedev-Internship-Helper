@@ -3,7 +3,6 @@ import { getDeadlineText } from '../utils/dateUtils';
 import { PLACEHOLDER_LOGO } from '../utils/constants';
 import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock, Bookmark, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
 
 interface DetailDrawerProps {
   internship: Internship | null;
@@ -24,13 +23,7 @@ const STATUS_OPTIONS: { id: AppStatus | 'none'; label: string; colorClass: strin
 ];
 
 export default function DetailDrawer({ internship, config, onClose, status, updateTrackStatus, showToast }: DetailDrawerProps) {
-  const [imageSrc, setImageSrc] = useState(internship?.logoUrl || PLACEHOLDER_LOGO);
-
   if (!internship) return null;
-
-  const handleImageError = () => {
-    setImageSrc(PLACEHOLDER_LOGO);
-  };
 
   const getTagDetails = (tagId: string): Tag | null => {
     for (const category of config) {
@@ -93,12 +86,20 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
 
           <div className="p-6 flex-1 flex flex-col gap-8">
             <div className="flex items-start gap-4">
+              
+              {/* ✨ อัปเดตส่วนรูปภาพแบบเดียวกับ FeaturedSection */}
               <img
-                src={imageSrc}
+                key={`drawer-img-${internship.id}`}
+                src={internship.logoUrl || PLACEHOLDER_LOGO}
                 alt={`${internship.name} logo`}
                 className="w-16 h-16 rounded-2xl object-cover bg-zinc-800 shadow-lg"
-                onError={handleImageError}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = PLACEHOLDER_LOGO;
+                }}
               />
+
               <div>
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">{internship.name}</h1>
                 <div className="flex items-center gap-2 mt-2 text-sm text-zinc-400">

@@ -47,11 +47,11 @@ export default function App() {
   }, []);
 
   // Return to home when all filters are cleared
-  useEffect(() => {
-    if (selectedRoles.length === 0 && selectedTags.length === 0 && !searchQuery && !showHome) {
-      setShowHome(true);
-    }
-  }, [selectedRoles, selectedTags, searchQuery, showHome]);
+  // useEffect(() => {
+  //   if (selectedRoles.length === 0 && selectedTags.length === 0 && !searchQuery && !showHome) {
+  //     setShowHome(true);
+  //   }
+  // }, [selectedRoles, selectedTags, searchQuery, showHome]);
 
   const showToast = (message: string) => {
     setToastInfo({ visible: true, message });
@@ -125,6 +125,7 @@ export default function App() {
     setSearchQuery('');
     setSelectedTags([]);
     setSelectedRoles([]);
+    setIsFilterOpen(false);
   };
 
   // ✨ ฟังก์ชัน Reset App ใหม่สำหรับกดที่ Logo

@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { Internship, ConfigCategory, Tag, AppStatus } from '../types';
 import { Clock, Flame, DollarSign, ChevronRight } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
 import { PLACEHOLDER_LOGO } from '../utils/constants';
-import { useState } from 'react';
 
 interface FeaturedSectionProps {
   internships: Internship[];
@@ -16,6 +16,20 @@ function getDaysLeft(deadline: string): number | null {
   if (!deadline) return null;
   const diff = new Date(deadline).getTime() - Date.now();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+// ✨ สร้าง Component ย่อยสำหรับจัดการรูปภาพโดยเฉพาะ (ใช้ useState ได้โดยไม่ผิดกฎ React)
+function ImageWithFallback({ src, alt, className, fallbackSrc }: { src: string, alt: string, className: string, fallbackSrc: string }) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  return (
+    <img
+      src={imgSrc || fallbackSrc}
+      alt={alt}
+      className={className}
+      onError={() => setImgSrc(fallbackSrc)}
+    />
+  );
 }
 
 export default function FeaturedSection({ internships, config, onCardClick, trackedJobs, updateTrackStatus }: FeaturedSectionProps) {
@@ -82,11 +96,9 @@ export default function FeaturedSection({ internships, config, onCardClick, trac
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {featured.items.map((item, idx) => {
-            const [imageSrc, setImageSrc] = useState(item.logoUrl);
             const daysLeft = getDaysLeft(item.deadline);
             const isUrgent = daysLeft !== null && daysLeft <= 5;
             
-            // ตอนนี้แค่เช็คว่ามีการ Track ไว้ไหมในส่วน Featured
             const isTracked = !!trackedJobs[item.id];
 
             const posTags = item.positions
@@ -130,11 +142,12 @@ export default function FeaturedSection({ internships, config, onCardClick, trac
                 </div>
 
                 <div className="flex flex-col gap-2 pr-12">
-                  <img
-                    src={imageSrc}
+                  {/* ✨ เรียกใช้งาน Component รูปภาพที่สร้างไว้ */}
+                  <ImageWithFallback
+                    src={item.logoUrl}
                     alt={item.name}
                     className="w-11 h-11 rounded-xl object-cover bg-zinc-800 border border-zinc-700/50"
-                    onError={() => setImageSrc(PLACEHOLDER_LOGO)}
+                    fallbackSrc={PLACEHOLDER_LOGO}
                   />
                   <h4 className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors leading-tight line-clamp-2">
                     {item.name}

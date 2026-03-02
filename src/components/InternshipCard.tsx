@@ -3,7 +3,6 @@ import { MapPin, Clock, Bookmark } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
 import { PLACEHOLDER_LOGO } from '../utils/constants';
 import { motion } from 'motion/react';
-import { useState } from 'react';
 
 interface InternshipCardProps {
   internship: Internship;
@@ -23,12 +22,6 @@ const STATUS_CONFIG = {
 };
 
 export default function InternshipCard({ internship, config, onClick, status, updateTrackStatus, index }: InternshipCardProps) {
-  const [imageSrc, setImageSrc] = useState(internship.logoUrl);
-
-  const handleImageError = () => {
-    setImageSrc(PLACEHOLDER_LOGO);
-  };
-
   const findTag = (id: string): Tag | null => {
     for (const cat of config) {
       const tag = cat.tags.find(t => t.id === id);
@@ -68,7 +61,20 @@ export default function InternshipCard({ internship, config, onClick, status, up
 
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <img src={imageSrc} className="w-12 h-12 rounded-xl object-cover bg-zinc-800 flex-shrink-0" alt="logo" onError={handleImageError} />
+          
+          {/* ✨ ใช้วิธีเดียวกับ FeaturedSection + ใส่ key เพื่อบังคับรีเซ็ตรูปใหม่ */}
+          <img
+            key={`card-img-${internship.id}`}
+            src={internship.logoUrl || PLACEHOLDER_LOGO}
+            className="w-12 h-12 rounded-xl object-cover bg-zinc-800 flex-shrink-0 border border-zinc-700/50"
+            alt={internship.name}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null; // ป้องกัน infinite loop
+              target.src = PLACEHOLDER_LOGO;
+            }}
+          />
+
           <div>
             <h3 className="text-base font-semibold text-zinc-100 group-hover:text-purple-400 transition-colors leading-snug">
               {internship.name}
