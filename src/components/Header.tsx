@@ -8,7 +8,7 @@ interface HeaderProps {
   showTracked: boolean;
   setShowTracked: (show: boolean) => void;
   trackedCount: number;
-  onLogoClick: () => void; // ✨ เพิ่ม Prop ใหม่
+  onLogoClick: () => void;
 }
 
 export default function Header({ 
@@ -19,32 +19,32 @@ export default function Header({
   showTracked,
   setShowTracked,
   trackedCount,
-  onLogoClick // ✨ รับฟังก์ชันมาใช้งาน
+  onLogoClick
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 pt-6 pb-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          {/* 🛠️ เปลี่ยน H1 เป็นปุ่มที่ใส่โลโก้ */}
+          {/* Logo Area */}
           <button 
             onClick={onLogoClick}
             className="flex items-center gap-2 group focus:outline-none hover:opacity-90 transition-opacity"
             title="Reset to home"
           >
-            {/* คุณสามารถเปลี่ยน src เป็นที่อยู่ของไฟล์โลโก้จริง เช่น "/logo.png" */}
+            {/* 🛠️ ปรับขนาดตรง h-14 (56px) หรือ h-16 (64px) ได้เลยครับ */}
             <img 
               src="/logo.png" 
               alt="Internship Hub" 
-              className="h-9 w-auto object-contain"
+              className="h-14 w-auto object-contain" 
               onError={(e) => {
-                // Fallback กรณีหาไฟล์รูปไม่เจอ จะแสดงเป็น Text แทนเหมือนเดิม
                 e.currentTarget.style.display = 'none';
                 const fallback = e.currentTarget.parentElement?.querySelector('.fallback-text');
                 if (fallback) fallback.classList.remove('hidden');
               }}
             />
             
-            <div className="fallback-text hidden flex flex-col">
+            {/* Fallback Text if image fails */}
+            <div className="fallback-text hidden flex flex-col items-start">
               <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2 group-hover:text-purple-400 transition-colors">
                 <span className="text-purple-500">GameDev</span> Hub 🎮
               </h1>
