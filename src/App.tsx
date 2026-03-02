@@ -5,6 +5,7 @@ import Header from './components/Header';
 import FilterSection from './components/FilterSection';
 import InternshipCard from './components/InternshipCard';
 import FeaturedSection from './components/FeaturedSection';
+import StatusList from './components/StatusList';
 import DetailDrawer from './components/DetailDrawer';
 import SkeletonCard from './components/SkeletonCard';
 import Toast from './components/Toast';
@@ -96,10 +97,8 @@ export default function App() {
         setSearchQuery={setSearchQuery} 
         onOpenFilter={() => setIsFilterOpen(true)}
         activeFilterCount={selectedTags.length}
-        showTracked={showTracked}
-        setShowTracked={setShowTracked}
-        trackedCount={Object.keys(trackedJobs).length}
-        onLogoClick={resetApp} // 🛠️ ส่ง Reset ไปที่นี่
+        onOpenSuggest={() => setIsSuggestOpen(true)}
+        onLogoClick={resetApp}
       />
 
       <FilterSection
@@ -113,13 +112,23 @@ export default function App() {
       
       <main className="max-w-5xl mx-auto p-6 flex flex-col gap-8">
         {!showTracked && !searchQuery && selectedTags.length === 0 && (
-          <FeaturedSection 
-            internships={internships} 
-            config={config} 
-            onCardClick={setSelectedIntern}
-            trackedJobs={trackedJobs}
-            updateTrackStatus={updateTrackStatus}
-          />
+          <>
+            {Object.keys(trackedJobs).length > 0 ? (
+              <StatusList 
+                internships={internships} 
+                trackedJobs={trackedJobs}
+                onCardClick={setSelectedIntern}
+              />
+            ) : (
+              <FeaturedSection 
+                internships={internships} 
+                config={config} 
+                onCardClick={setSelectedIntern}
+                trackedJobs={trackedJobs}
+                updateTrackStatus={updateTrackStatus}
+              />
+            )}
+          </>
         )}
 
         <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
@@ -182,13 +191,6 @@ export default function App() {
             ⚠️ กรุณาตรวจเช็คความถูกต้องของข้อมูลอีกครั้ง เนื่องจากไม่ได้อัปเดตตลอดทุกลิสต์
           </p>
         </div>
-        
-        <button 
-          onClick={() => setIsSuggestOpen(true)}
-          className="px-4 py-2 bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 hover:bg-zinc-800 text-purple-400 text-xs font-bold rounded-full transition-all flex items-center gap-2"
-        >
-          💡 แนะนำบริษัทเพิ่มเติม
-        </button>
       </footer>
 
       <DetailDrawer

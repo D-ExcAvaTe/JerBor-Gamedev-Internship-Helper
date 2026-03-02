@@ -1,6 +1,8 @@
 import { Internship, ConfigCategory, Tag, AppStatus } from '../types';
 import { Clock, Flame, DollarSign, ChevronRight } from 'lucide-react';
 import { getDeadlineText } from '../utils/dateUtils';
+import { PLACEHOLDER_LOGO } from '../utils/constants';
+import { useState } from 'react';
 
 interface FeaturedSectionProps {
   internships: Internship[];
@@ -80,6 +82,7 @@ export default function FeaturedSection({ internships, config, onCardClick, trac
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {featured.items.map((item, idx) => {
+            const [imageSrc, setImageSrc] = useState(item.logoUrl);
             const daysLeft = getDaysLeft(item.deadline);
             const isUrgent = daysLeft !== null && daysLeft <= 5;
             
@@ -128,10 +131,10 @@ export default function FeaturedSection({ internships, config, onCardClick, trac
 
                 <div className="flex flex-col gap-2 pr-12">
                   <img
-                    src={item.logoUrl}
+                    src={imageSrc}
                     alt={item.name}
                     className="w-11 h-11 rounded-xl object-cover bg-zinc-800 border border-zinc-700/50"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    onError={() => setImageSrc(PLACEHOLDER_LOGO)}
                   />
                   <h4 className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors leading-tight line-clamp-2">
                     {item.name}

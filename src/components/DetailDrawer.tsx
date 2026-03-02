@@ -1,7 +1,9 @@
 import { Internship, ConfigCategory, Tag, AppStatus } from '../types';
 import { getDeadlineText } from '../utils/dateUtils';
+import { PLACEHOLDER_LOGO } from '../utils/constants';
 import { X, ExternalLink, MapPin, Clock, DollarSign, Briefcase, Link as LinkIcon, Mail, CalendarClock, Bookmark, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
 
 interface DetailDrawerProps {
   internship: Internship | null;
@@ -22,7 +24,13 @@ const STATUS_OPTIONS: { id: AppStatus | 'none'; label: string; colorClass: strin
 ];
 
 export default function DetailDrawer({ internship, config, onClose, status, updateTrackStatus, showToast }: DetailDrawerProps) {
+  const [imageSrc, setImageSrc] = useState(internship?.logoUrl || PLACEHOLDER_LOGO);
+
   if (!internship) return null;
+
+  const handleImageError = () => {
+    setImageSrc(PLACEHOLDER_LOGO);
+  };
 
   const getTagDetails = (tagId: string): Tag | null => {
     for (const category of config) {
@@ -86,9 +94,10 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
           <div className="p-6 flex-1 flex flex-col gap-8">
             <div className="flex items-start gap-4">
               <img
-                src={internship.logoUrl}
+                src={imageSrc}
                 alt={`${internship.name} logo`}
                 className="w-16 h-16 rounded-2xl object-cover bg-zinc-800 shadow-lg"
+                onError={handleImageError}
               />
               <div>
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">{internship.name}</h1>

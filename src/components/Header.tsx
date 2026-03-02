@@ -1,13 +1,11 @@
-import { Search, SlidersHorizontal, LayoutList } from 'lucide-react';
+import { Search, SlidersHorizontal, Lightbulb } from 'lucide-react';
 
 interface HeaderProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onOpenFilter: () => void;
   activeFilterCount: number;
-  showTracked: boolean;
-  setShowTracked: (show: boolean) => void;
-  trackedCount: number;
+  onOpenSuggest: () => void;
   onLogoClick: () => void;
 }
 
@@ -16,9 +14,7 @@ export default function Header({
   setSearchQuery, 
   onOpenFilter, 
   activeFilterCount,
-  showTracked,
-  setShowTracked,
-  trackedCount,
+  onOpenSuggest,
   onLogoClick
 }: HeaderProps) {
   return (
@@ -68,20 +64,11 @@ export default function Header({
           </div>
 
           <button
-            onClick={() => setShowTracked(!showTracked)}
-            className={`flex items-center justify-center gap-2 px-4 py-2 border rounded-xl transition-colors relative shrink-0 ${
-              showTracked 
-                ? 'bg-purple-500/10 border-purple-500/50 text-purple-400' 
-                : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300'
-            }`}
+            onClick={onOpenSuggest}
+            className="flex items-center justify-center gap-2 px-4 py-2 border rounded-xl transition-colors relative shrink-0 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300"
           >
-            <LayoutList className="w-5 h-5" />
-            <span className="hidden sm:inline font-medium text-sm">Tracker</span>
-            {trackedCount > 0 && !showTracked && (
-              <span className="absolute -top-1.5 -right-1.5 bg-zinc-700 text-zinc-100 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-950">
-                {trackedCount}
-              </span>
-            )}
+            <Lightbulb className="w-5 h-5" />
+            <span className="hidden sm:inline font-medium text-sm">แนะนำบริษัท</span>
           </button>
 
           <button

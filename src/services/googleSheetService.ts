@@ -2,9 +2,9 @@ const SHEET_ID = '19MSrc1mB4LJI7R9IeMUd3C4iGmxbzH8wM_TojY0c-rc';
 
 const CAT_COLORS = {
   programmer: '#3B82F6',   // Blue
-  artist: '#EC4899',       // Pink
-  design: '#A855F7',       // Purple
-  other: '#6B7280',        // Gray
+  artist: '#3B82F6',       // Blue (unified)
+  design: '#3B82F6',       // Blue (unified)
+  other: '#3B82F6',        // Blue (unified)
   workMode: '#06B6D4',     // Cyan
   stipend: '#EAB308',      // Yellow
 };
