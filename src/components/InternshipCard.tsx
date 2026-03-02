@@ -97,15 +97,16 @@ export default function InternshipCard({ internship, config, onClick, status, up
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
           {status ? (
-             <span className={`px-2 py-1 rounded text-[10px] font-bold ${STATUS_CONFIG[status].bg} ${STATUS_CONFIG[status].text}`}>
+             <span className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${STATUS_CONFIG[status].bg} ${STATUS_CONFIG[status].text}`}>
                {STATUS_CONFIG[status].label}
              </span>
           ) : (
             <button 
               onClick={(e) => { e.stopPropagation(); updateTrackStatus(internship.id, 'saved'); }}
-              className="p-1.5 -mr-1.5 rounded-full text-zinc-500 hover:text-purple-400 hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 text-purple-400 text-xs font-bold transition-all"
             >
               <Bookmark className="w-4 h-4" />
+              <span>เล็งไว้</span>
             </button>
           )}
           

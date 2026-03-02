@@ -10,7 +10,7 @@ import DetailDrawer from './components/DetailDrawer';
 import SkeletonCard from './components/SkeletonCard';
 import Toast from './components/Toast';
 import SuggestModal from './components/SuggestModal';
-import { SearchX, Inbox } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 import { motion } from 'motion/react';
 
 type SortOption = 'deadline' | 'stipend' | 'status';
@@ -25,7 +25,6 @@ export default function App() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [trackedJobs, setTrackedJobs] = useState<Record<string, AppStatus>>({});
-  const [showTracked, setShowTracked] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('deadline');
   
   const [toastInfo, setToastInfo] = useState<{ visible: boolean; message: string }>({
@@ -76,7 +75,6 @@ export default function App() {
   // ✨ ฟังก์ชัน Reset App ใหม่สำหรับกดที่ Logo
   const resetApp = () => {
     clearFilters();
-    setShowTracked(false);
     setSelectedIntern(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -85,9 +83,8 @@ export default function App() {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const allItemTags = [...item.positions, ...item.workMode, item.stipend, item.location.toLowerCase().replace(/\s+/g, '_')];
     const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => allItemTags.includes(tag));
-    const matchesTracked = !showTracked || !!trackedJobs[item.id];
     
-    return matchesSearch && matchesTags && matchesTracked;
+    return matchesSearch && matchesTags;
   });
 
   return (
@@ -111,7 +108,7 @@ export default function App() {
       />
       
       <main className="max-w-5xl mx-auto p-6 flex flex-col gap-8">
-        {!showTracked && !searchQuery && selectedTags.length === 0 && (
+        {!searchQuery && selectedTags.length === 0 && (
           <>
             {Object.keys(trackedJobs).length > 0 ? (
               <StatusList 
@@ -134,7 +131,7 @@ export default function App() {
         <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold tracking-tight">
-              {showTracked ? 'My Tracked Internships' : 'All Internships'}
+              All Internships
             </h2>
             <span className="bg-zinc-800 text-zinc-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
               {filteredData.length}
@@ -166,18 +163,10 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center py-20 bg-zinc-900/20 rounded-3xl border border-dashed border-zinc-800"
           >
-            {showTracked ? <Inbox className="w-12 h-12 text-zinc-700 mb-4" /> : <SearchX className="w-12 h-12 text-zinc-700 mb-4" />}
+            <SearchX className="w-12 h-12 text-zinc-700 mb-4" />
             <p className="text-zinc-500 font-medium">
-              {showTracked ? 'คุณยังไม่มีงานที่บันทึกไว้' : 'ไม่พบข้อมูลที่ตรงกับการค้นหา'}
+              ไม่พบข้อมูลที่ตรงกับการค้นหา
             </p>
-            {showTracked && (
-              <button 
-                onClick={() => setShowTracked(false)}
-                className="mt-4 text-purple-400 text-sm font-bold hover:text-purple-300 transition-colors"
-              >
-                ดูงานทั้งหมด
-              </button>
-            )}
           </motion.div>
         )}
       </main>

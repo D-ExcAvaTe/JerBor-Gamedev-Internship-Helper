@@ -102,6 +102,19 @@ export const getAppData = async () => {
 
     const stipendVal = (typeof stipend === 'string' && stipend.trim() === 'มี') ? 'paid' : 'unpaid';
 
+    // Check if deadline has passed
+    let finalStatus: 'Open' | 'Closed' = 'Closed';
+    if (status === 'Open') {
+      if (deadlineStr) {
+        const deadline = new Date(deadlineStr);
+        const now = new Date();
+        finalStatus = deadline.getTime() >= now.getTime() ? 'Open' : 'Closed';
+      } else {
+        // No deadline, keep as Open if status is Open
+        finalStatus = 'Open';
+      }
+    }
+
     return {
       id: id?.toString() || index.toString(),
       name: name || 'Unknown',
@@ -112,7 +125,7 @@ export const getAppData = async () => {
       stipendAmount: amt || '-',
       location: area ? area.trim() : '',
       deadline: deadlineStr,
-      status: status === 'Open' ? 'Open' : 'Closed',
+      status: finalStatus,
       requirements: [],
       benefits: [],
       workHours: workHours || '',
