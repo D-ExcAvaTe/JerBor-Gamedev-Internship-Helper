@@ -1,5 +1,5 @@
 import { ConfigCategory } from '../types';
-import { X } from 'lucide-react';
+import { X, Code, Palette, Pen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface FilterSectionProps {
@@ -7,11 +7,20 @@ interface FilterSectionProps {
   onClose: () => void;
   config: ConfigCategory[];
   selectedTags: string[];
+  selectedRoles: ('programmer' | 'artist' | 'design' | 'other')[];
   toggleTag: (tagId: string) => void;
+  toggleRole: (role: 'programmer' | 'artist' | 'design' | 'other') => void;
   clearFilters: () => void;
 }
 
-export default function FilterSection({ isOpen, onClose, config, selectedTags, toggleTag, clearFilters }: FilterSectionProps) {
+const ROLE_INFO = {
+  programmer: { icon: Code, label: 'Programmer', color: '#3B82F6' },
+  artist: { icon: Palette, label: 'Artist', color: '#EC4899' },
+  design: { icon: Pen, label: 'Designer', color: '#A855F7' },
+  other: { icon: null, label: 'Other', color: '#6B7280' },
+} as const;
+
+export default function FilterSection({ isOpen, onClose, config, selectedTags, selectedRoles, toggleTag, toggleRole, clearFilters }: FilterSectionProps) {
   if (!isOpen) return null;
 
   return (
@@ -42,6 +51,45 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, t
           </div>
 
           <div className="p-6 flex-1 flex flex-col gap-8">
+            {/* Role Filter */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-900 pb-2">
+                Filter by Role
+              </h3>
+              <div className="flex flex-col gap-2">
+                {(['programmer', 'artist', 'design', 'other'] as const).map((role) => {
+                  const RoleIcon = ROLE_INFO[role].icon;
+                  const isSelected = selectedRoles.includes(role);
+                  return (
+                    <button
+                      key={role}
+                      onClick={() => toggleRole(role)}
+                      className={`
+                        flex items-center gap-3 px-3 py-2 rounded-lg border transition-all
+                        ${isSelected
+                          ? 'bg-purple-500/20 border-purple-500/50 text-purple-300'
+                          : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300'
+                        }
+                      `}
+                    >
+                      <div className={`
+                        w-4 h-4 rounded border flex items-center justify-center flex-shrink-0
+                        ${isSelected
+                          ? 'bg-purple-500 border-purple-400'
+                          : 'border-zinc-600'
+                        }
+                      `}>
+                        {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+                      </div>
+                      {RoleIcon && <RoleIcon className="w-4 h-4 flex-shrink-0" />}
+                      <span className="text-sm font-medium">{ROLE_INFO[role].label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tag Filter */}
             {config.map((category) => (
               <div key={category.id} className="flex flex-col gap-3">
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-900 pb-2">

@@ -1,14 +1,17 @@
 import { motion } from 'motion/react';
 import { Code, Palette, Pen } from 'lucide-react';
+import { useState } from 'react';
 
 interface HomeScreenProps {
-  onSelectCategory: (category: 'programmer' | 'artist' | 'design' | 'other') => void;
+  onSelectRoles: (roles: ('programmer' | 'artist' | 'design' | 'other')[]) => void;
 }
 
-export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
+export default function HomeScreen({ onSelectRoles }: HomeScreenProps) {
+  const [selectedRoles, setSelectedRoles] = useState<('programmer' | 'artist' | 'design' | 'other')[]>([]);
+
   const categories = [
     {
-      id: 'programmer',
+      id: 'programmer' as const,
       label: 'Programmer',
       icon: Code,
       color: 'from-blue-600 to-blue-700',
@@ -16,7 +19,7 @@ export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
       hoverAccent: 'hover:bg-blue-500/30 hover:border-blue-400/70',
     },
     {
-      id: 'artist',
+      id: 'artist' as const,
       label: 'Artist',
       icon: Palette,
       color: 'from-rose-600 to-rose-700',
@@ -24,7 +27,7 @@ export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
       hoverAccent: 'hover:bg-rose-500/30 hover:border-rose-400/70',
     },
     {
-      id: 'design',
+      id: 'design' as const,
       label: 'Designer',
       icon: Pen,
       color: 'from-purple-600 to-purple-700',
@@ -32,6 +35,21 @@ export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
       hoverAccent: 'hover:bg-purple-500/30 hover:border-purple-400/70',
     },
   ];
+
+  const handleToggleRole = (role: 'programmer' | 'artist' | 'design' | 'other') => {
+    setSelectedRoles(prev => {
+      if (prev.includes(role)) {
+        return prev.filter(r => r !== role);
+      } else {
+        return [...prev, role];
+      }
+    });
+  };
+
+  const handleApply = () => {
+    if (selectedRoles.length === 0) return;
+    onSelectRoles(selectedRoles);
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 py-8">
@@ -59,65 +77,128 @@ export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
       </motion.div>
 
       {/* Category Buttons */}
-      <div className="max-w-2xl w-full flex flex-col gap-4 mb-8">
+      <div className="max-w-xl w-full flex flex-col gap-3">
         {categories.map((category, idx) => {
           const Icon = category.icon;
+          const isSelected = selectedRoles.includes(category.id);
+
           return (
             <motion.button
               key={category.id}
-              onClick={() => onSelectCategory(category.id as any)}
-              initial={{ opacity: 0, rotateY: 90, y: 20 }}
+              onClick={() => handleToggleRole(category.id)}
+              initial={{ opacity: 0, rotateY: 90, y: 10 }}
               animate={{ opacity: 1, rotateY: 0, y: 0 }}
               transition={{
-                duration: 0.5,
+                duration: 0.4,
                 ease: 'easeOut',
-                delay: idx * 0.1,
+                delay: idx * 0.08,
               }}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               className={`
-                relative overflow-hidden group rounded-2xl border
-                px-8 py-6 sm:py-8
-                transition-all
-                ${category.accent} ${category.hoverAccent}
+                relative overflow-hidden group rounded-lg border
+                px-4 py-3
+                transition-all flex items-center gap-3
+                ${isSelected 
+                  ? `${category.accent} ring-2 ring-purple-500` 
+                  : `${category.accent} ${category.hoverAccent}`
+                }
               `}
               style={{
                 perspective: '1000px',
               }}
             >
-              {/* Gradient background */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-              />
+              {/* Checkbox */}
+              <div className={`
+                w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
+                transition-all
+                ${isSelected 
+                  ? 'bg-purple-500 border-purple-400' 
+                  : 'border-zinc-500 bg-transparent'
+                }
+              `}>
+                {isSelected && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-white text-xs font-bold"
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </div>
 
-              {/* Content */}
-              <div className="relative flex items-center gap-4 z-10">
-                <div className="flex-shrink-0">
-                  <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-inherit" />
-                </div>
-                <span className="text-2xl sm:text-3xl font-bold text-zinc-100 group-hover:text-white transition-colors">
+              {/* Icon and Label */}
+              <div className="flex items-center gap-2 flex-1 text-left">
+                <Icon className="w-5 h-5 text-inherit flex-shrink-0" />
+                <span className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
                   {category.label}
                 </span>
               </div>
-
-              {/* Shine effect on hover */}
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 transform group-hover:-skew-x-12 group-hover:translate-x-full transition-all duration-500" />
             </motion.button>
           );
         })}
+
+        {/* Other option checkbox */}
+        <motion.button
+          onClick={() => handleToggleRole('other')}
+          initial={{ opacity: 0, rotateY: 90, y: 10 }}
+          animate={{ opacity: 1, rotateY: 0, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.24 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          className={`
+            relative overflow-hidden group rounded-lg border
+            px-4 py-3 transition-all flex items-center gap-3
+            ${selectedRoles.includes('other')
+              ? 'bg-zinc-700/30 border-zinc-600 ring-2 ring-purple-500'
+              : 'bg-zinc-800/20 border-zinc-700 hover:bg-zinc-800/30 hover:border-zinc-600'
+            }
+          `}
+        >
+          <div className={`
+            w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
+            transition-all
+            ${selectedRoles.includes('other')
+              ? 'bg-purple-500 border-purple-400'
+              : 'border-zinc-500 bg-transparent'
+            }
+          `}>
+            {selectedRoles.includes('other') && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="text-white text-xs font-bold"
+              >
+                ✓
+              </motion.span>
+            )}
+          </div>
+          <span className="text-sm font-semibold text-zinc-300 group-hover:text-zinc-100 transition-colors">
+            Other Positions
+          </span>
+        </motion.button>
       </div>
 
-      {/* Other Button */}
+      {/* Apply Button */}
       <motion.button
-        onClick={() => onSelectCategory('other')}
-        initial={{ opacity: 0, y: 20 }}
+        onClick={handleApply}
+        disabled={selectedRoles.length === 0}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="px-6 py-2.5 rounded-full bg-zinc-800/50 border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 text-sm font-semibold transition-all"
+        transition={{ duration: 0.4, delay: 0.32 }}
+        whileHover={selectedRoles.length > 0 ? { scale: 1.05 } : {}}
+        whileTap={selectedRoles.length > 0 ? { scale: 0.95 } : {}}
+        className={`
+          mt-6 px-8 py-2.5 rounded-lg font-bold text-sm
+          transition-all
+          ${selectedRoles.length > 0
+            ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+          }
+        `}
       >
-        Other Positions
+        Explore Now ({selectedRoles.length})
       </motion.button>
 
       {/* Footer hint */}
@@ -125,9 +206,9 @@ export default function HomeScreen({ onSelectCategory }: HomeScreenProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-16 text-xs text-zinc-600 text-center max-w-md"
+        className="mt-12 text-xs text-zinc-600 text-center max-w-md"
       >
-        💡 Click on any category to explore internships, or use the search & filters in the header
+        💡 Select one or more roles and click "Explore Now", or use search & filters in the header
       </motion.p>
     </div>
   );

@@ -28,6 +28,7 @@ export default function App() {
   const [trackedJobs, setTrackedJobs] = useState<Record<string, AppStatus>>({});
   const [sortOption, setSortOption] = useState<SortOption>('deadline');
   const [showHome, setShowHome] = useState(true);
+  const [selectedRoles, setSelectedRoles] = useState<('programmer' | 'artist' | 'design' | 'other')[]>([]);
   
   const [toastInfo, setToastInfo] = useState<{ visible: boolean; message: string }>({
     visible: false,
@@ -69,9 +70,16 @@ export default function App() {
     );
   };
 
+  const toggleRole = (role: 'programmer' | 'artist' | 'design' | 'other') => {
+    setSelectedRoles(prev =>
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedTags([]);
+    setSelectedRoles([]);
   };
 
   // ✨ ฟังก์ชัน Reset App ใหม่สำหรับกดที่ Logo
@@ -112,6 +120,28 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleRolesSelect = (roles: ('programmer' | 'artist' | 'design' | 'other')[]) => {
+    // Get all position tags from selected roles
+    const positionConfig = config.find(c => c.id === 'position');
+    if (!positionConfig) return;
+
+    const roleTags: string[] = [];
+
+    roles.forEach(role => {
+      if (positionConfig.subCategories) {
+        const targetSub = positionConfig.subCategories.find(s => s.id === role);
+        if (targetSub) {
+          roleTags.push(...targetSub.tags.map(t => t.id));
+        }
+      }
+    });
+
+    setSelectedRoles(roles);
+    setSelectedTags(roleTags);
+    setShowHome(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const filteredData = internships.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const allItemTags = [...item.positions, ...item.workMode, item.stipend, item.location.toLowerCase().replace(/\s+/g, '_')];
@@ -139,12 +169,14 @@ export default function App() {
         onClose={() => setIsFilterOpen(false)}
         config={config}
         selectedTags={selectedTags}
+        selectedRoles={selectedRoles}
         toggleTag={toggleTag}
+        toggleRole={toggleRole}
         clearFilters={clearFilters}
       />
 
-      {showHome && !searchQuery && selectedTags.length === 0 && loading === false ? (
-        <HomeScreen onSelectCategory={handleCategorySelect} />
+      {showHome && !searchQuery && selectedTags.length === 0 && selectedRoles.length === 0 && loading === false ? (
+        <HomeScreen onSelectRoles={handleRolesSelect} />
       ) : (
       <main className="max-w-5xl mx-auto p-6 flex flex-col gap-8">
         {!searchQuery && selectedTags.length === 0 && (
