@@ -73,13 +73,13 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, s
                       `}
                     >
                       <div className={`
-                        w-4 h-4 rounded border flex items-center justify-center flex-shrink-0
+                        w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0
                         ${isSelected
                           ? 'bg-purple-500 border-purple-400'
                           : 'border-zinc-600'
                         }
                       `}>
-                        {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+                        {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
                       </div>
                       {RoleIcon && <RoleIcon className="w-4 h-4 flex-shrink-0" />}
                       <span className="text-sm font-medium">{ROLE_INFO[role].label}</span>
@@ -106,6 +106,7 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, s
                         <div className="flex flex-wrap gap-2">
                           {sub.tags.map((tag) => {
                             const isSelected = selectedTags.includes(tag.id);
+                            const isSingleSelect = ['workMode', 'stipend'].includes(category.id);
                             return (
                               <button
                                 key={tag.id}
@@ -117,6 +118,7 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, s
                                 }}
                                 className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200"
                               >
+                                {isSingleSelect && (isSelected ? '● ' : '○ ')}
                                 {tag.label}
                                 <span className="opacity-40 ml-1">({tag.count})</span>
                               </button>
@@ -130,6 +132,7 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, s
                   <div className="flex flex-wrap gap-2">
                     {category.tags.map((tag) => {
                       const isSelected = selectedTags.includes(tag.id);
+                      const isSingleSelect = ['workMode', 'stipend'].includes(category.id);
                       return (
                         <button
                           key={tag.id}
@@ -141,6 +144,7 @@ export default function FilterSection({ isOpen, onClose, config, selectedTags, s
                           }}
                           className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200"
                         >
+                          {isSingleSelect && (isSelected ? '● ' : '○ ')}
                           {tag.label}
                           <span className="opacity-40 ml-1">({tag.count})</span>
                         </button>

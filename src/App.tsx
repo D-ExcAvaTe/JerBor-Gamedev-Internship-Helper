@@ -46,6 +46,13 @@ export default function App() {
     if (saved) setTrackedJobs(JSON.parse(saved));
   }, []);
 
+  // Return to home when all filters are cleared
+  useEffect(() => {
+    if (selectedRoles.length === 0 && selectedTags.length === 0 && !searchQuery && !showHome) {
+      setShowHome(true);
+    }
+  }, [selectedRoles, selectedTags, searchQuery, showHome]);
+
   const showToast = (message: string) => {
     setToastInfo({ visible: true, message });
     setTimeout(() => setToastInfo({ visible: false, message: '' }), 3000);
@@ -65,9 +72,47 @@ export default function App() {
   };
 
   const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
-    );
+    setSelectedTags(prev => {
+      // Find which category this tag belongs to
+      let tagCategoryId: string | undefined;
+      
+      for (const cat of config) {
+        if (cat.tags.find(t => t.id === tagId)) {
+          tagCategoryId = cat.id;
+          break;
+        }
+        if (cat.subCategories) {
+          for (const sub of cat.subCategories) {
+            if (sub.tags.find(t => t.id === tagId)) {
+              tagCategoryId = cat.id;
+              break;
+            }
+          }
+        }
+      }
+
+      // Single-select categories: workMode and stipend
+      const singleSelectCategories = ['workMode', 'stipend'];
+      
+      if (prev.includes(tagId)) {
+        // Deselecting: just remove it
+        return prev.filter(t => t !== tagId);
+      } else {
+        // Selecting: check if this category is single-select
+        if (singleSelectCategories.includes(tagCategoryId || '')) {
+          // Remove other tags from same category, then add this one
+          const categoryTags = config
+            .find(c => c.id === tagCategoryId)
+            ?.tags.map(t => t.id) || [];
+          
+          const filtered = prev.filter(t => !categoryTags.includes(t));
+          return [...filtered, tagId];
+        } else {
+          // Multi-select: just add it
+          return [...prev, tagId];
+        }
+      }
+    });
   };
 
   const toggleRole = (role: 'programmer' | 'artist' | 'design' | 'other') => {
