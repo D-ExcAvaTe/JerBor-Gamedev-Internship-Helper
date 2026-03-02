@@ -35,7 +35,7 @@ export default function Header({
             <img 
               src="/logo.png" 
               alt="Internship Hub" 
-              className="h-14 w-auto object-contain" 
+              className="h-14 w-auto object-contain scale-[4]"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const fallback = e.currentTarget.parentElement?.querySelector('.fallback-text');
