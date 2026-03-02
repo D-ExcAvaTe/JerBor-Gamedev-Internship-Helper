@@ -38,8 +38,9 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
     return null;
   };
 
-  const allTagIds = [...internship.positions, ...internship.workMode, internship.stipend];
-  const tags = allTagIds.map(getTagDetails).filter(Boolean) as Tag[];
+  const positionTags = internship.positions.map(getTagDetails).filter(Boolean) as Tag[];
+  const workModeTags = internship.workMode.map(getTagDetails).filter(Boolean) as Tag[];
+  const stipendTag = getTagDetails(internship.stipend);
 
   const handleCopyInfo = () => {
     const text = `🎯 ${internship.name}\n📍 ${internship.location}\n💰 ${internship.stipendAmount}\n🔗 ${internship.jobPostUrl || internship.contactUrl}`;
@@ -93,7 +94,7 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
                 <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">{internship.name}</h1>
                 <div className="flex items-center gap-2 mt-2 text-sm text-zinc-400">
                   <MapPin className="w-4 h-4 text-red-500" />
-                  {internship.location.toUpperCase()}
+                  {internship.location || 'ไม่ระบุสถานที่'}
                 </div>
               </div>
             </div>
@@ -124,28 +125,63 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  style={{
-                    backgroundColor: `${tag.color}15`,
-                    color: tag.color,
-                    borderColor: `${tag.color}30`,
-                  }}
-                  className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider"
-                >
-                  {tag.label}
-                </span>
-              ))}
-            </div>
+            {positionTags.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">ตำแหน่งที่เปิดรับ</h3>
+                <div className="flex flex-wrap gap-2">
+                  {positionTags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      style={{
+                        backgroundColor: `${tag.color}15`,
+                        color: tag.color,
+                        borderColor: `${tag.color}30`,
+                      }}
+                      className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider"
+                    >
+                      {tag.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(workModeTags.length > 0 || stipendTag) && (
+              <div className="flex flex-wrap gap-2">
+                {workModeTags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    style={{
+                      backgroundColor: `${tag.color}15`,
+                      color: tag.color,
+                      borderColor: `${tag.color}30`,
+                    }}
+                    className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider"
+                  >
+                    {tag.label}
+                  </span>
+                ))}
+                {stipendTag && (
+                  <span
+                    style={{
+                      backgroundColor: `${stipendTag.color}15`,
+                      color: stipendTag.color,
+                      borderColor: `${stipendTag.color}30`,
+                    }}
+                    className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider"
+                  >
+                    {stipendTag.label}
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1">
                   <DollarSign className="w-3 h-3 text-yellow-500" /> Stipend
                 </span>
-                <span className="text-sm font-medium text-zinc-200">{internship.stipendAmount}</span>
+                <span className="text-sm font-medium text-zinc-200">{internship.stipendAmount || 'ไม่ระบุ'}</span>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1">
@@ -155,16 +191,16 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
               </div>
             </div>
 
-            {internship.workHours && (
+            {internship.workHours ? (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1 mb-1">
                   <CalendarClock className="w-3 h-3 text-emerald-400" /> เวลาทำงาน (จันทร์–ศุกร์)
                 </span>
                 <span className="text-sm font-medium text-zinc-200">{internship.workHours}</span>
               </div>
-            )}
+            ) : null}
 
-            {internship.email && (
+            {internship.email ? (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
                 <span className="text-xs text-zinc-500 flex items-center gap-1 mb-1">
                   <Mail className="w-3 h-3 text-blue-400" /> อีเมลติดต่อ
@@ -176,9 +212,9 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
                   {internship.email}
                 </a>
               </div>
-            )}
+            ) : null}
 
-            {internship.jobPostUrl && (
+            {internship.jobPostUrl ? (
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
                   <LinkIcon className="w-4 h-4 text-blue-400" /> Original Post
@@ -195,7 +231,7 @@ export default function DetailDrawer({ internship, config, onClose, status, upda
                   </a>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {internship.location && (
               <div className="flex flex-col gap-3">

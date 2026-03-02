@@ -66,14 +66,22 @@ export default function InternshipCard({ internship, config, onClick, status, up
               {internship.name}
             </h3>
             <div className="flex items-center gap-3 text-xs text-zinc-500 mt-1 flex-wrap">
-              {internship.location && (
+              {internship.location ? (
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3" /> {internship.location}
                 </span>
+              ) : (
+                <span className="flex items-center gap-1 text-zinc-600 italic">
+                  <MapPin className="w-3 h-3" /> ไม่ระบุสถานที่
+                </span>
               )}
-              {internship.deadline && (
+              {internship.deadline ? (
                 <span className={`flex items-center gap-1 ${isUrgent ? 'text-red-400 font-semibold' : ''}`}>
                   <Clock className="w-3 h-3" /> {getDeadlineText(internship.deadline)}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-zinc-600 italic">
+                  <Clock className="w-3 h-3" /> ไม่มีกำหนด
                 </span>
               )}
             </div>
